@@ -38,15 +38,25 @@ const ClassSetup: React.FC<ClassSetupProps> = ({ onNext, onBack }) => {
     grade: '',
     section: '',
     numberOfStudents: 30,
-    assignedRoom: ''
+    assignedRoom: '',
+    specialRequirements: []
   });
 
   const handleNewClassChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setNewClass(prev => ({
-      ...prev,
-      [name]: name === 'numberOfStudents' ? Number(value) : value
-    }));
+    
+    // Special handling for special requirements - convert textarea input to array
+    if (name === 'specialRequirements') {
+      setNewClass(prev => ({
+        ...prev,
+        [name]: value.split('\n').filter(item => item.trim() !== '')
+      }));
+    } else {
+      setNewClass(prev => ({
+        ...prev,
+        [name]: name === 'numberOfStudents' ? Number(value) : value
+      }));
+    }
   };
 
   const addClass = () => {
@@ -59,7 +69,7 @@ const ClassSetup: React.FC<ClassSetupProps> = ({ onNext, onBack }) => {
       section: newClass.section,
       numberOfStudents: newClass.numberOfStudents,
       assignedRoom: newClass.assignedRoom,
-      specialRequirements: newClass.specialRequirements?.split('\n')
+      specialRequirements: newClass.specialRequirements
     };
 
     setClasses([...classes, classGroup]);
@@ -85,6 +95,9 @@ const ClassSetup: React.FC<ClassSetupProps> = ({ onNext, onBack }) => {
   const handleNext = () => {
     onNext({ classes });
   };
+
+  // Convert special requirements array back to newline-separated string for textarea display
+  const specialRequirementsText = newClass.specialRequirements ? newClass.specialRequirements.join('\n') : '';
 
   return (
     <div className="space-y-6">
@@ -163,7 +176,7 @@ const ClassSetup: React.FC<ClassSetupProps> = ({ onNext, onBack }) => {
                   <Textarea
                     id="specialRequirements"
                     name="specialRequirements"
-                    value={newClass.specialRequirements || ''}
+                    value={specialRequirementsText}
                     onChange={handleNewClassChange}
                     placeholder="Enter any special requirements, one per line"
                     rows={3}
