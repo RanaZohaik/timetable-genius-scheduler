@@ -176,6 +176,7 @@ const TimetableWizard: React.FC = () => {
                 <StepStatus complete={<StepIcon />} incomplete={<StepNumber />} active={<StepNumber />} />
               </StepIndicator>
               <StepTitle>General Setup</StepTitle>
+              <StepDescription>School info & periods</StepDescription>
               <StepSeparator />
             </div>
             
@@ -184,6 +185,7 @@ const TimetableWizard: React.FC = () => {
                 <StepStatus complete={<StepIcon />} incomplete={<StepNumber />} active={<StepNumber />} />
               </StepIndicator>
               <StepTitle>Subjects</StepTitle>
+              <StepDescription>Configure subjects</StepDescription>
               <StepSeparator />
             </div>
             
@@ -192,6 +194,7 @@ const TimetableWizard: React.FC = () => {
                 <StepStatus complete={<StepIcon />} incomplete={<StepNumber />} active={<StepNumber />} />
               </StepIndicator>
               <StepTitle>Teachers</StepTitle>
+              <StepDescription>Teacher profiles</StepDescription>
               <StepSeparator />
             </div>
             
@@ -200,6 +203,7 @@ const TimetableWizard: React.FC = () => {
                 <StepStatus complete={<StepIcon />} incomplete={<StepNumber />} active={<StepNumber />} />
               </StepIndicator>
               <StepTitle>Classes</StepTitle>
+              <StepDescription>Class setup</StepDescription>
               <StepSeparator />
             </div>
             
@@ -208,6 +212,7 @@ const TimetableWizard: React.FC = () => {
                 <StepStatus complete={<StepIcon />} incomplete={<StepNumber />} active={<StepNumber />} />
               </StepIndicator>
               <StepTitle>Lessons</StepTitle>
+              <StepDescription>Create lessons</StepDescription>
               <StepSeparator />
             </div>
             
@@ -216,6 +221,7 @@ const TimetableWizard: React.FC = () => {
                 <StepStatus complete={<StepIcon />} incomplete={<StepNumber />} active={<StepNumber />} />
               </StepIndicator>
               <StepTitle>Generate</StepTitle>
+              <StepDescription>Review & generate</StepDescription>
               <StepSeparator />
             </div>
             
@@ -224,6 +230,7 @@ const TimetableWizard: React.FC = () => {
                 <StepStatus complete={<StepIcon />} incomplete={<StepNumber />} active={<StepNumber />} />
               </StepIndicator>
               <StepTitle>Distribute</StepTitle>
+              <StepDescription>Share & finalize</StepDescription>
             </div>
           </Steps>
         </CardContent>

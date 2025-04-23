@@ -1,7 +1,18 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Users, Settings, BookOpen, School, FileText } from 'lucide-react';
+import { 
+  Calendar, 
+  Users, 
+  Settings, 
+  BookOpen, 
+  School, 
+  FileText, 
+  LayoutDashboard, 
+  UserCog, 
+  BarChart, 
+  Video 
+} from 'lucide-react';
 
 interface SidebarProps {
   activePath: string;
@@ -9,17 +20,21 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ activePath }) => {
   const navItems = [
-    { name: 'Dashboard', path: '/', icon: <Calendar size={20} /> },
+    { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={20} /> },
     { name: 'Generate Timetable', path: '/generate', icon: <Calendar size={20} /> },
     { name: 'Teachers', path: '/teachers', icon: <Users size={20} /> },
+    { name: 'Teacher Substitute', path: '/teachers/substitute', icon: <UserCog size={20} /> },
     { name: 'Classes', path: '/classes', icon: <School size={20} /> },
     { name: 'Subjects', path: '/subjects', icon: <BookOpen size={20} /> },
-    { name: 'Reports', path: '/reports', icon: <FileText size={20} /> },
+    { name: 'Reports', path: '/reports', icon: <BarChart size={20} /> },
+    { name: 'Guide', path: '/guide', icon: <FileText size={20} /> },
+    { name: 'Schedule Demo', path: '/demo', icon: <Video size={20} /> },
+    { name: 'User Management', path: '/users', icon: <Users size={20} /> },
     { name: 'Settings', path: '/settings', icon: <Settings size={20} /> },
   ];
 
   return (
-    <aside className="w-64 bg-gray-50 border-r border-gray-200 h-screen">
+    <aside className="w-64 bg-gray-50 border-r border-gray-200 h-screen overflow-y-auto">
       <nav className="py-6">
         <ul className="space-y-1 px-3">
           {navItems.map((item) => (
