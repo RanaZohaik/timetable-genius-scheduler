@@ -7,7 +7,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import GenerateTimetablePage from "./pages/generate";
 
-// Import all the new pages
+// Import all the pages
 import TeachersPage from "./pages/teachers";
 import TeacherSubstitutePage from "./pages/teachers/substitute";
 import ClassesPage from "./pages/classes";
@@ -18,6 +18,7 @@ import InviteUsersPage from "./pages/users/invite";
 import GuidePage from "./pages/guide";
 import DemoPage from "./pages/demo";
 import SettingsPage from "./pages/settings";
+import TimetablesPage from "./pages/timetables";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/generate" element={<GenerateTimetablePage />} />
+        <Route path="/timetables" element={<TimetablesPage />} />
         <Route path="/teachers" element={<TeachersPage />} />
         <Route path="/teachers/substitute" element={<TeacherSubstitutePage />} />
         <Route path="/classes" element={<ClassesPage />} />

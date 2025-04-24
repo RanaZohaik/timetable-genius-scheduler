@@ -11,7 +11,8 @@ import {
   LayoutDashboard, 
   UserCog, 
   BarChart, 
-  Video 
+  Video,
+  BookText
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -22,6 +23,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePath }) => {
   const navItems = [
     { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={20} /> },
     { name: 'Generate Timetable', path: '/generate', icon: <Calendar size={20} /> },
+    { name: 'View Timetables', path: '/timetables', icon: <BookText size={20} /> },
     { name: 'Teachers', path: '/teachers', icon: <Users size={20} /> },
     { name: 'Teacher Substitute', path: '/teachers/substitute', icon: <UserCog size={20} /> },
     { name: 'Classes', path: '/classes', icon: <School size={20} /> },
