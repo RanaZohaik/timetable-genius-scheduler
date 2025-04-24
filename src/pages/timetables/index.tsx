@@ -3,12 +3,13 @@ import Layout from '@/components/Layout';
 import PageHeader from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Plus, RefreshCw, Printer, FileText, Save } from 'lucide-react';
-import { Timetable } from '@/types';
+import { Timetable, ClassGroup } from '@/types';
 import TimetableViewer from '@/components/timetables/TimetableViewer';
 import TimetableList from '@/components/timetables/TimetableList';
-import { useToast } from '@/components/ui/use-toast';
+import ClassEditor from '@/components/timetables/ClassEditor';
+import { useToast } from '@/hooks/use-toast';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
@@ -98,11 +99,21 @@ const sampleTimetables: Timetable[] = [
   }
 ];
 
+const availableClasses: ClassGroup[] = [
+  { id: 'c2b', name: 'Class 2B', grade: '2', section: 'B' },
+  { id: 'c3c', name: 'Class 3C', grade: '3', section: 'C' },
+  { id: 'c4d', name: 'Class 4D', grade: '4', section: 'D' },
+  { id: 'c5e', name: 'Class 5E', grade: '5', section: 'E' },
+  { id: 'c6f', name: 'Class 6F', grade: '6', section: 'F' },
+  { id: 'c7g', name: 'Class 7G', grade: '7', section: 'G' },
+];
+
 const TimetablesPage = () => {
   const [timetables, setTimetables] = useState<Timetable[]>(sampleTimetables);
   const [selectedTimetable, setSelectedTimetable] = useState<Timetable | null>(timetables[0] || null);
-  const [viewMode, setViewMode] = useState<'list' | 'detail'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'detail' | 'classes'>('list');
   const [loading, setLoading] = useState<boolean>(false);
+  const [classes, setClasses] = useState<ClassGroup[]>(availableClasses);
   const { toast } = useToast();
   
   const handleSelectTimetable = (timetable: Timetable) => {
@@ -130,7 +141,6 @@ const TimetablesPage = () => {
     setLoading(true);
     
     setTimeout(() => {
-      // Simulate refresh from server
       setSelectedTimetable(prev => {
         if (!prev) return null;
         const freshData = timetables.find(t => t.id === prev.id);
@@ -189,7 +199,6 @@ const TimetablesPage = () => {
         variant: "default",
       });
       
-      // If this is the currently selected timetable, update it
       if (selectedTimetable?.id === id) {
         setSelectedTimetable(prev => prev ? { ...prev, status: 'published', updatedAt: new Date().toISOString() } : null);
       }
@@ -235,6 +244,14 @@ const TimetablesPage = () => {
     }, 800);
   };
 
+  const handleClassesChange = (updatedClasses: ClassGroup[]) => {
+    setClasses(updatedClasses);
+  };
+
+  const handleSwitchToClasses = () => {
+    setViewMode('classes');
+  };
+
   return (
     <Layout>
       <DndProvider backend={HTML5Backend}>
@@ -250,6 +267,22 @@ const TimetablesPage = () => {
             onDelete={handleDeleteTimetable}
             onPublish={handlePublishTimetable}
           />
+        ) : viewMode === 'classes' ? (
+          <>
+            <div className="flex justify-between items-center mb-4">
+              <Button variant="outline" onClick={() => setViewMode('detail')}>
+                Back to Timetable
+              </Button>
+            </div>
+            <Card>
+              <CardContent className="pt-6">
+                <ClassEditor 
+                  classes={classes}
+                  onClassesChange={handleClassesChange}
+                />
+              </CardContent>
+            </Card>
+          </>
         ) : (
           <>
             <div className="flex justify-between items-center mb-4">
@@ -270,6 +303,9 @@ const TimetablesPage = () => {
                 </Button>
                 <Button variant="outline" onClick={handleExport}>
                   <FileText className="w-4 h-4 mr-2" /> Export
+                </Button>
+                <Button variant="outline" onClick={handleSwitchToClasses}>
+                  <Plus className="w-4 h-4 mr-2" /> Edit Classes
                 </Button>
                 <Button variant="outline" onClick={handleSaveTimetable} disabled={loading}>
                   <Save className="w-4 h-4 mr-2" /> Save
@@ -301,7 +337,8 @@ const TimetablesPage = () => {
                 )}
                 <TimetableViewer 
                   timetable={selectedTimetable} 
-                  onUpdateTimetable={handleUpdateTimetable} 
+                  onUpdateTimetable={handleUpdateTimetable}
+                  availableClasses={classes}
                 />
               </>
             )}

@@ -1,6 +1,5 @@
-
 import React, { useState, useCallback, useRef } from 'react';
-import { Timetable, Subject, ClassGroup, Teacher, Room } from '@/types';
+import { Timetable, Subject, ClassGroup, Teacher, Room, TimetableSlot } from '@/types';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -9,7 +8,7 @@ import {
   Plus, Edit as EditIcon, Trash2 as Trash2Icon, 
   Save, Move, Download, FileText, RefreshCw, Printer
 } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import {
@@ -19,7 +18,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -42,6 +40,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { format } from 'date-fns';
+import ClashDetector from './ClashDetector';
 
 const sampleSubjects: Record<string, Subject> = {
   's1': { id: 's1', code: 'PE', name: 'Physical Education', color: 'teal' },
@@ -86,19 +85,10 @@ const samplePeriods = [
 interface TimetableViewerProps {
   timetable: Timetable;
   onUpdateTimetable?: (updatedTimetable: Timetable) => void;
+  availableClasses?: ClassGroup[];
 }
 
-interface TimetableSlot {
-  id: string;
-  day: string;
-  periodId: string;
-  subjectId: string;
-  teacherId: string;
-  roomId: string;
-  classId: string;
-}
-
-const TimetableViewer: React.FC<TimetableViewerProps> = ({ timetable, onUpdateTimetable }) => {
+const TimetableViewer: React.FC<TimetableViewerProps> = ({ timetable, onUpdateTimetable, availableClasses }) => {
   const [activeTab, setActiveTab] = useState('events');
   const [selectedClass, setSelectedClass] = useState<string>('c2b');
   const [currentTimetable, setCurrentTimetable] = useState<Timetable>({...timetable});
@@ -115,36 +105,69 @@ const TimetableViewer: React.FC<TimetableViewerProps> = ({ timetable, onUpdateTi
   const [cardToDelete, setCardToDelete] = useState<string | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingCard, setEditingCard] = useState<string | null>(null);
+  const [showClashDetection, setShowClashDetection] = useState(false);
+  const [clashingSlot, setClashingSlot] = useState<TimetableSlot | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   
-  const availableClasses = [
-    { id: 'c2b', name: 'Class 2B' },
-    { id: 'c3c', name: 'Class 3C' },
-    { id: 'c4d', name: 'Class 4D' },
-    { id: 'c5e', name: 'Class 5E' },
-    { id: 'c6f', name: 'Class 6F' },
-    { id: 'c7g', name: 'Class 7G' },
-    { id: 'c8h', name: 'Class 8H' },
-  ];
+  const classOptions = availableClasses || Object.values(sampleClasses);
 
   const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
-  const handleAddCard = () => {
-    if (!newCard.day || !newCard.periodId || !newCard.subjectId || !newCard.roomId || !newCard.teacherId) {
+  const validateSlot = (slot: Partial<TimetableSlot>): boolean => {
+    if (!slot.day || !slot.periodId || !slot.subjectId || !slot.roomId || !slot.teacherId) {
       toast({
         title: "Missing information",
         description: "Please fill in all required fields",
         variant: "destructive",
       });
-      return;
+      return false;
     }
 
-    const newSlot: any = {
-      ...newCard,
-      id: `slot-${Date.now()}`,
-      classId: selectedClass
+    return true;
+  };
+
+  const checkForClashes = (slot: TimetableSlot): boolean => {
+    const teacherClash = currentTimetable.slots.some(
+      s => 
+        s.id !== slot.id && 
+        s.teacherId === slot.teacherId && 
+        s.day === slot.day && 
+        s.periodId === slot.periodId
+    );
+
+    const classClash = currentTimetable.slots.some(
+      s => 
+        s.id !== slot.id && 
+        s.classId === slot.classId && 
+        s.day === slot.day && 
+        s.periodId === slot.periodId
+    );
+
+    const roomClash = currentTimetable.slots.some(
+      s => 
+        s.id !== slot.id && 
+        s.roomId === slot.roomId && 
+        s.day === slot.day && 
+        s.periodId === slot.periodId
+    );
+
+    return teacherClash || classClash || roomClash;
+  };
+
+  const handleAddCard = () => {
+    if (!validateSlot(newCard)) return;
+
+    const newSlot: TimetableSlot = {
+      ...newCard as TimetableSlot,
+      id: `slot-${Date.now()}`
     };
+
+    if (checkForClashes(newSlot)) {
+      setClashingSlot(newSlot);
+      setShowClashDetection(true);
+      return;
+    }
 
     const updatedTimetable = {
       ...currentTimetable,
@@ -173,17 +196,21 @@ const TimetableViewer: React.FC<TimetableViewerProps> = ({ timetable, onUpdateTi
   };
 
   const handleEditCard = () => {
-    if (!newCard.day || !newCard.periodId || !newCard.subjectId || !newCard.roomId || !newCard.teacherId) {
-      toast({
-        title: "Missing information",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      });
+    if (!validateSlot(newCard)) return;
+
+    const updatedSlot: TimetableSlot = {
+      ...newCard as TimetableSlot,
+      id: editingCard || `slot-${Date.now()}`
+    };
+
+    if (checkForClashes(updatedSlot)) {
+      setClashingSlot(updatedSlot);
+      setShowClashDetection(true);
       return;
     }
 
     const updatedSlots = currentTimetable.slots.map(slot => 
-      slot.id === editingCard ? { ...slot, ...newCard } : slot
+      slot.id === editingCard ? updatedSlot : slot
     );
 
     const updatedTimetable = {
@@ -225,6 +252,53 @@ const TimetableViewer: React.FC<TimetableViewerProps> = ({ timetable, onUpdateTi
     });
   };
 
+  const handleResolveClash = (resolution: 'cancel' | 'replace' | 'reschedule', existingSlot?: TimetableSlot) => {
+    if (!clashingSlot) return;
+
+    switch(resolution) {
+      case 'cancel':
+        setShowClashDetection(false);
+        setClashingSlot(null);
+        toast({
+          title: "Changes cancelled",
+          description: "Your changes were not applied due to scheduling conflicts."
+        });
+        break;
+
+      case 'replace':
+        if (existingSlot) {
+          const filteredSlots = currentTimetable.slots.filter(s => s.id !== existingSlot.id);
+          
+          const updatedTimetable = {
+            ...currentTimetable,
+            slots: [...filteredSlots, clashingSlot],
+            updatedAt: new Date().toISOString()
+          };
+          
+          setCurrentTimetable(updatedTimetable);
+          if (onUpdateTimetable) onUpdateTimetable(updatedTimetable);
+          
+          toast({
+            title: "Schedule replaced",
+            description: "The existing schedule was replaced with your new entry."
+          });
+        }
+        setShowClashDetection(false);
+        setClashingSlot(null);
+        setIsCardDialogOpen(false);
+        setIsEditMode(false);
+        break;
+
+      case 'reschedule':
+        setShowClashDetection(false);
+        toast({
+          title: "Please reschedule",
+          description: "You can modify your entry to avoid the scheduling conflict."
+        });
+        break;
+    }
+  };
+
   const handlePrint = useCallback(() => {
     toast({
       title: "Printing timetable",
@@ -262,7 +336,7 @@ const TimetableViewer: React.FC<TimetableViewerProps> = ({ timetable, onUpdateTi
     });
   }, [timetable, toast]);
 
-  const handleEditClick = (slot: any) => {
+  const handleEditClick = (slot: TimetableSlot) => {
     setIsEditMode(true);
     setEditingCard(slot.id);
     setNewCard({
@@ -310,6 +384,7 @@ const TimetableViewer: React.FC<TimetableViewerProps> = ({ timetable, onUpdateTi
     
     const subject = sampleSubjects[slot.subjectId];
     const room = slot.roomId ? sampleRooms[slot.roomId] : null;
+    const teacher = slot.teacherId ? sampleTeachers[slot.teacherId] : null;
     
     if (!subject) {
       return null;
@@ -340,6 +415,9 @@ const TimetableViewer: React.FC<TimetableViewerProps> = ({ timetable, onUpdateTi
         <div className="text-center font-bold text-xl mt-2">
           {subject.code}
         </div>
+        <div className="text-sm text-center mt-1">
+          {teacher?.name || 'No teacher'}
+        </div>
         <div className="absolute top-0 right-0 bg-white rounded-bl-md opacity-0 group-hover:opacity-100 transition-opacity">
           <Button 
             variant="ghost" 
@@ -365,10 +443,20 @@ const TimetableViewer: React.FC<TimetableViewerProps> = ({ timetable, onUpdateTi
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="space-y-4" ref={printRef}>
+        {showClashDetection && clashingSlot && (
+          <ClashDetector 
+            slots={currentTimetable.slots} 
+            newSlot={clashingSlot}
+            onResolveClash={handleResolveClash} 
+          />
+        )}
+        
         <Card>
           <CardHeader className="pb-3">
             <div className="flex justify-between items-center">
-              <CardTitle>{sampleClasses[selectedClass]?.name || 'Class'}</CardTitle>
+              <CardTitle>
+                {classOptions.find(c => c.id === selectedClass)?.name || 'Class'}
+              </CardTitle>
               <Button variant="outline" onClick={() => {
                 setNewCard({
                   day: '',
@@ -433,55 +521,29 @@ const TimetableViewer: React.FC<TimetableViewerProps> = ({ timetable, onUpdateTi
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {availableClasses.map((cls) => (
+                {classOptions.map((cls) => (
                   <div 
                     key={cls.id} 
                     className={`p-3 border rounded-md cursor-pointer flex justify-between items-center
                       ${selectedClass === cls.id ? 'bg-blue-600 text-white' : 'hover:bg-gray-50'}`}
                     onClick={() => setSelectedClass(cls.id)}
                   >
-                    <span>{cls.name}</span>
-                    <div className="flex space-x-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className={selectedClass === cls.id ? 'hover:bg-blue-700' : ''}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          console.log('Edit class', cls.id);
-                        }}
-                      >
-                        <EditIcon className="w-4 h-4" />
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            className={selectedClass === cls.id ? 'hover:bg-blue-700' : ''}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                            }}
-                          >
-                            <Trash2Icon className="w-4 h-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This will delete the class and all associated slots from the timetable.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction className="bg-red-600">Delete</AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                    <div>
+                      <span className="font-medium">{cls.name}</span>
+                      {cls.grade && cls.section && (
+                        <span className="text-sm ml-2 opacity-80">
+                          (Grade {cls.grade}, Section {cls.section})
+                        </span>
+                      )}
                     </div>
                   </div>
                 ))}
+
+                {classOptions.length === 0 && (
+                  <div className="p-4 text-center border border-dashed rounded-md">
+                    <p className="text-gray-500">No classes available. Add classes to create timetable.</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -604,6 +666,21 @@ const TimetableViewer: React.FC<TimetableViewerProps> = ({ timetable, onUpdateTi
                   {Object.values(sampleRooms).map(room => (
                     <SelectItem key={room.id} value={room.id}>
                       {room.name} (Capacity: {room.capacity})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="class">Class</Label>
+              <Select value={newCard.classId} onValueChange={(value) => setNewCard({...newCard, classId: value})}>
+                <SelectTrigger id="class">
+                  <SelectValue placeholder="Select class" />
+                </SelectTrigger>
+                <SelectContent>
+                  {classOptions.map(cls => (
+                    <SelectItem key={cls.id} value={cls.id}>
+                      {cls.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
