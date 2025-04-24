@@ -10,8 +10,23 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Settings, Building, Calendar, Clock, Bell, PaintBucket } from 'lucide-react';
+import { 
+  Settings, Building, Calendar, Clock, Bell, PaintBucket, 
+  Save, Download, Upload, RefreshCw
+} from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { useToast } from '@/components/ui/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const weekdays = [
   { id: 'monday', label: 'Monday' },
@@ -25,6 +40,9 @@ const weekdays = [
 
 const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState('school-info');
+  const [loading, setLoading] = useState(false);
+  const [isRestoreDialogOpen, setIsRestoreDialogOpen] = useState(false);
+  const { toast } = useToast();
   
   const schoolInfoForm = useForm({
     defaultValues: {
@@ -67,18 +85,112 @@ const SettingsPage = () => {
   });
   
   const handleSaveSchoolInfo = (data: any) => {
-    console.log('School info saved:', data);
-    // In a real app, this would save to a server
+    setLoading(true);
+    setTimeout(() => {
+      console.log('School info saved:', data);
+      toast({
+        title: "Settings saved",
+        description: "School information has been updated successfully.",
+      });
+      setLoading(false);
+    }, 800);
   };
   
   const handleSavePeriodSettings = (data: any) => {
-    console.log('Period settings saved:', data);
-    // In a real app, this would save to a server
+    setLoading(true);
+    setTimeout(() => {
+      console.log('Period settings saved:', data);
+      toast({
+        title: "Settings saved",
+        description: "Period settings have been updated successfully.",
+      });
+      setLoading(false);
+    }, 800);
   };
   
   const handleSavePreferences = (data: any) => {
-    console.log('Preferences saved:', data);
-    // In a real app, this would save to a server
+    setLoading(true);
+    setTimeout(() => {
+      console.log('Preferences saved:', data);
+      toast({
+        title: "Settings saved",
+        description: "Preferences have been updated successfully.",
+      });
+      setLoading(false);
+    }, 800);
+  };
+
+  const handleCreateBackup = () => {
+    setLoading(true);
+    setTimeout(() => {
+      const settings = {
+        schoolInfo: schoolInfoForm.getValues(),
+        periodSettings: periodSettingsForm.getValues(),
+        preferences: preferencesForm.getValues(),
+        timestamp: new Date().toISOString()
+      };
+      
+      const dataStr = JSON.stringify(settings, null, 2);
+      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+      
+      const exportFileDefaultName = `system-settings-backup-${new Date().toISOString().split('T')[0]}.json`;
+      
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.click();
+      
+      toast({
+        title: "Backup created",
+        description: "System settings have been backed up successfully.",
+      });
+      
+      setLoading(false);
+    }, 1000);
+  };
+  
+  const handleRestoreBackup = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e: any) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const settings = JSON.parse(event.target?.result as string);
+          
+          if (settings.schoolInfo) {
+            schoolInfoForm.reset(settings.schoolInfo);
+          }
+          
+          if (settings.periodSettings) {
+            periodSettingsForm.reset(settings.periodSettings);
+          }
+          
+          if (settings.preferences) {
+            preferencesForm.reset(settings.preferences);
+          }
+          
+          toast({
+            title: "Backup restored",
+            description: `Settings restored from backup (${new Date(settings.timestamp).toLocaleString()})`,
+          });
+          
+          setIsRestoreDialogOpen(false);
+        } catch (error) {
+          toast({
+            title: "Restore failed",
+            description: "The selected file is not a valid settings backup.",
+            variant: "destructive",
+          });
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
   };
 
   return (
@@ -274,8 +386,18 @@ const SettingsPage = () => {
                     />
                     
                     <div className="flex justify-end">
-                      <Button type="submit">
-                        Save School Information
+                      <Button type="submit" disabled={loading}>
+                        {loading ? (
+                          <>
+                            <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="mr-2 h-4 w-4" />
+                            Save School Information
+                          </>
+                        )}
                       </Button>
                     </div>
                   </form>
@@ -431,8 +553,18 @@ const SettingsPage = () => {
                     </div>
                     
                     <div className="flex justify-end">
-                      <Button type="submit">
-                        Save Period Settings
+                      <Button type="submit" disabled={loading}>
+                        {loading ? (
+                          <>
+                            <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="mr-2 h-4 w-4" />
+                            Save Period Settings
+                          </>
+                        )}
                       </Button>
                     </div>
                   </form>
@@ -659,19 +791,59 @@ const SettingsPage = () => {
                         />
                         
                         <div className="pt-2">
-                          <Button variant="outline" className="mr-2">
+                          <Button 
+                            variant="outline" 
+                            className="mr-2" 
+                            disabled={loading} 
+                            onClick={handleCreateBackup}
+                          >
+                            <Download className="w-4 h-4 mr-2" />
                             Create Backup Now
                           </Button>
-                          <Button variant="outline" className="border-amber-300 text-amber-700 hover:bg-amber-50">
-                            Restore from Backup
-                          </Button>
+                          
+                          <AlertDialog open={isRestoreDialogOpen} onOpenChange={setIsRestoreDialogOpen}>
+                            <AlertDialogTrigger asChild>
+                              <Button 
+                                variant="outline" 
+                                className="border-amber-300 text-amber-700 hover:bg-amber-50"
+                              >
+                                <Upload className="w-4 h-4 mr-2" />
+                                Restore from Backup
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Restore from Backup</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This will overwrite all current settings with the ones from the backup file.
+                                  Make sure to create a backup of your current settings before proceeding.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleRestoreBackup}>
+                                  Select Backup File
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       </div>
                     </div>
                     
                     <div className="flex justify-end">
-                      <Button type="submit">
-                        Save Preferences
+                      <Button type="submit" disabled={loading}>
+                        {loading ? (
+                          <>
+                            <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="mr-2 h-4 w-4" />
+                            Save Preferences
+                          </>
+                        )}
                       </Button>
                     </div>
                   </form>

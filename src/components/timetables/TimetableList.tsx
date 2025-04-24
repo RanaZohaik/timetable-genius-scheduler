@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Timetable } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,16 @@ import { Edit, Trash2, Eye, Calendar, Check } from 'lucide-react';
 import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface TimetableListProps {
   timetables: Timetable[];
@@ -19,6 +29,9 @@ interface TimetableListProps {
 const TimetableList: React.FC<TimetableListProps> = ({ 
   timetables, onSelect, onDelete, onPublish 
 }) => {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [timetableToDelete, setTimetableToDelete] = useState<string | null>(null);
+
   const getStatusColor = (status: 'draft' | 'published' | 'archived'): string => {
     switch (status) {
       case 'published':
@@ -39,6 +52,19 @@ const TimetableList: React.FC<TimetableListProps> = ({
     } catch (e) {
       return 'Invalid date';
     }
+  };
+
+  const handleDeleteClick = (id: string) => {
+    setTimetableToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (timetableToDelete) {
+      onDelete(timetableToDelete);
+      setTimetableToDelete(null);
+    }
+    setDeleteDialogOpen(false);
   };
 
   return (
@@ -129,7 +155,7 @@ const TimetableList: React.FC<TimetableListProps> = ({
                         variant="outline" 
                         size="sm" 
                         className="h-8 text-destructive hover:bg-destructive/10"
-                        onClick={() => onDelete(timetable.id)}
+                        onClick={() => handleDeleteClick(timetable.id)}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -142,6 +168,24 @@ const TimetableList: React.FC<TimetableListProps> = ({
           </Card>
         ))}
       </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this timetable?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the timetable
+              and remove all associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

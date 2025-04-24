@@ -1,15 +1,17 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import Layout from '@/components/Layout';
 import PageHeader from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
-import { Plus, RefreshCw, Printer, FileText, Edit, Trash2 } from 'lucide-react';
+import { Plus, RefreshCw, Printer, FileText, Save } from 'lucide-react';
 import { Timetable } from '@/types';
 import TimetableViewer from '@/components/timetables/TimetableViewer';
 import TimetableList from '@/components/timetables/TimetableList';
 import { useToast } from '@/components/ui/use-toast';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 // Sample data for demonstration
 const sampleTimetables: Timetable[] = [
@@ -24,6 +26,7 @@ const sampleTimetables: Timetable[] = [
     updatedAt: '2023-08-20T14:45:00Z',
     slots: [
       {
+        id: 'slot-1',
         day: 'Monday',
         periodId: '1',
         teacherId: 't1',
@@ -32,6 +35,7 @@ const sampleTimetables: Timetable[] = [
         roomId: 'r103'
       },
       {
+        id: 'slot-2',
         day: 'Tuesday',
         periodId: '1',
         teacherId: 't4',
@@ -40,6 +44,7 @@ const sampleTimetables: Timetable[] = [
         roomId: 'r104'
       },
       {
+        id: 'slot-3',
         day: 'Tuesday',
         periodId: '2',
         teacherId: 't4',
@@ -48,6 +53,7 @@ const sampleTimetables: Timetable[] = [
         roomId: 'r104'
       },
       {
+        id: 'slot-4',
         day: 'Wednesday',
         periodId: '1',
         teacherId: 't6',
@@ -56,6 +62,7 @@ const sampleTimetables: Timetable[] = [
         roomId: 'r105'
       },
       {
+        id: 'slot-5',
         day: 'Friday',
         periodId: '3',
         teacherId: 't9',
@@ -96,6 +103,7 @@ const TimetablesPage = () => {
   const [timetables, setTimetables] = useState<Timetable[]>(sampleTimetables);
   const [selectedTimetable, setSelectedTimetable] = useState<Timetable | null>(timetables[0] || null);
   const [viewMode, setViewMode] = useState<'list' | 'detail'>('list');
+  const [loading, setLoading] = useState<boolean>(false);
   const { toast } = useToast();
   
   const handleSelectTimetable = (timetable: Timetable) => {
@@ -119,105 +127,189 @@ const TimetablesPage = () => {
     setViewMode('list');
   };
   
-  const handleRefresh = () => {
-    toast({
-      title: "Refreshed",
-      description: "Timetable data has been refreshed."
-    });
-  };
+  const handleRefresh = useCallback(() => {
+    setLoading(true);
+    
+    setTimeout(() => {
+      // Simulate refresh from server
+      setSelectedTimetable(prev => {
+        if (!prev) return null;
+        const freshData = timetables.find(t => t.id === prev.id);
+        return freshData ? {...freshData} : prev;
+      });
+      
+      setLoading(false);
+      
+      toast({
+        title: "Refreshed",
+        description: "Timetable data has been refreshed."
+      });
+    }, 800);
+  }, [toast, timetables]);
   
-  const handlePrint = () => {
+  const handlePrint = useCallback(() => {
     toast({
       title: "Print initiated",
       description: "Preparing timetable for printing..."
     });
     window.print();
-  };
+  }, [toast]);
   
-  const handleExport = () => {
+  const handleExport = useCallback(() => {
+    if (!selectedTimetable) return;
+    
+    const dataStr = JSON.stringify(selectedTimetable, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = `timetable-${selectedTimetable.name.toLowerCase().replace(/\s+/g, '-')}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+    
     toast({
       title: "Export initiated",
-      description: "Preparing timetable export..."
+      description: "Timetable exported as JSON file"
+    });
+  }, [selectedTimetable, toast]);
+
+  const handlePublishTimetable = (id: string) => {
+    setLoading(true);
+    
+    setTimeout(() => {
+      setTimetables(prev => prev.map(t => 
+        t.id === id ? { ...t, status: 'published', updatedAt: new Date().toISOString() } : t
+      ));
+      
+      setLoading(false);
+      
+      toast({
+        title: "Timetable Published",
+        description: "The timetable has been successfully published and is now available to all users.",
+        variant: "default",
+      });
+      
+      // If this is the currently selected timetable, update it
+      if (selectedTimetable?.id === id) {
+        setSelectedTimetable(prev => prev ? { ...prev, status: 'published', updatedAt: new Date().toISOString() } : null);
+      }
+    }, 1000);
+  };
+
+  const handleUpdateTimetable = (updatedTimetable: Timetable) => {
+    setTimetables(prev => prev.map(t => 
+      t.id === updatedTimetable.id ? updatedTimetable : t
+    ));
+    
+    setSelectedTimetable(updatedTimetable);
+    
+    toast({
+      title: "Timetable updated",
+      description: "Your changes have been saved successfully."
     });
   };
 
-  const handlePublishTimetable = (id: string) => {
-    setTimetables(prev => prev.map(t => 
-      t.id === id ? { ...t, status: 'published', updatedAt: new Date().toISOString() } : t
-    ));
+  const handleSaveTimetable = () => {
+    if (!selectedTimetable) return;
     
-    toast({
-      title: "Timetable Published",
-      description: "The timetable has been successfully published and is now available to all users.",
-      variant: "default",
-    });
+    setLoading(true);
     
-    // If this is the currently selected timetable, update it
-    if (selectedTimetable?.id === id) {
-      setSelectedTimetable(prev => prev ? { ...prev, status: 'published', updatedAt: new Date().toISOString() } : null);
-    }
+    setTimeout(() => {
+      const updatedTimetable = {
+        ...selectedTimetable,
+        updatedAt: new Date().toISOString()
+      };
+      
+      setTimetables(prev => prev.map(t => 
+        t.id === updatedTimetable.id ? updatedTimetable : t
+      ));
+      
+      setSelectedTimetable(updatedTimetable);
+      
+      setLoading(false);
+      
+      toast({
+        title: "Timetable saved",
+        description: "All changes have been saved successfully."
+      });
+    }, 800);
   };
 
   return (
-    <Layout>
-      <PageHeader 
-        title="Timetables" 
-        description="View, manage, and export your created timetables"
-      />
-      
-      {viewMode === 'list' ? (
-        <TimetableList 
-          timetables={timetables} 
-          onSelect={handleSelectTimetable} 
-          onDelete={handleDeleteTimetable}
-          onPublish={handlePublishTimetable}
+    <DndProvider backend={HTML5Backend}>
+      <Layout>
+        <PageHeader 
+          title="Timetables" 
+          description="View, manage, and export your created timetables"
         />
-      ) : (
-        <>
-          <div className="flex justify-between items-center mb-4">
-            <Button variant="outline" onClick={handleBackToList}>
-              Back to List
-            </Button>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={handleRefresh}>
-                <RefreshCw className="w-4 h-4 mr-2" /> Refresh
+        
+        {viewMode === 'list' ? (
+          <TimetableList 
+            timetables={timetables} 
+            onSelect={handleSelectTimetable} 
+            onDelete={handleDeleteTimetable}
+            onPublish={handlePublishTimetable}
+          />
+        ) : (
+          <>
+            <div className="flex justify-between items-center mb-4">
+              <Button variant="outline" onClick={handleBackToList}>
+                Back to List
               </Button>
-              <Button variant="outline" onClick={handlePrint}>
-                <Printer className="w-4 h-4 mr-2" /> Print
-              </Button>
-              <Button variant="outline" onClick={handleExport}>
-                <FileText className="w-4 h-4 mr-2" /> Export
-              </Button>
-              {selectedTimetable && selectedTimetable.status !== 'published' && (
+              <div className="flex gap-2">
                 <Button 
-                  onClick={() => handlePublishTimetable(selectedTimetable.id)}
-                  className="bg-purple-600 hover:bg-purple-700 text-white"
+                  variant="outline" 
+                  onClick={handleRefresh}
+                  disabled={loading}
                 >
-                  Publish
+                  <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} /> 
+                  {loading ? 'Loading...' : 'Refresh'}
                 </Button>
-              )}
+                <Button variant="outline" onClick={handlePrint}>
+                  <Printer className="w-4 h-4 mr-2" /> Print
+                </Button>
+                <Button variant="outline" onClick={handleExport}>
+                  <FileText className="w-4 h-4 mr-2" /> Export
+                </Button>
+                <Button variant="outline" onClick={handleSaveTimetable} disabled={loading}>
+                  <Save className="w-4 h-4 mr-2" /> Save
+                </Button>
+                {selectedTimetable && selectedTimetable.status !== 'published' && (
+                  <Button 
+                    onClick={() => handlePublishTimetable(selectedTimetable.id)}
+                    className="bg-purple-600 hover:bg-purple-700 text-white"
+                    disabled={loading}
+                  >
+                    {loading ? "Publishing..." : "Publish"}
+                  </Button>
+                )}
+              </div>
             </div>
-          </div>
-          
-          {selectedTimetable && (
-            <>
-              {selectedTimetable.status === 'published' && (
-                <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-md flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-                    <span className="text-green-700 font-medium">This timetable is published and available to all users</span>
+            
+            {selectedTimetable && (
+              <>
+                {selectedTimetable.status === 'published' && (
+                  <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-md flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                      <span className="text-green-700 font-medium">This timetable is published and available to all users</span>
+                    </div>
+                    <span className="text-sm text-green-600">
+                      Published on {new Date(selectedTimetable.updatedAt).toLocaleDateString()}
+                    </span>
                   </div>
-                  <span className="text-sm text-green-600">
-                    Published on {new Date(selectedTimetable.updatedAt).toLocaleDateString()}
-                  </span>
-                </div>
-              )}
-              <TimetableViewer timetable={selectedTimetable} />
-            </>
-          )}
-        </>
-      )}
-    </Layout>
+                )}
+                <TimetableViewer 
+                  timetable={selectedTimetable} 
+                  onUpdateTimetable={handleUpdateTimetable} 
+                />
+              </>
+            )}
+          </>
+        )}
+      </Layout>
+    </DndProvider>
   );
 };
 
