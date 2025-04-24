@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Badge } from '../ui/badge';
 import { toast } from '../ui/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 interface UpdateDistributeProps {
   timetable: Timetable;
@@ -24,6 +25,8 @@ const UpdateDistribute: React.FC<UpdateDistributeProps> = ({
 }) => {
   const [selectedView, setSelectedView] = useState<'class' | 'teacher' | 'room'>('class');
   const [selectedEntityId, setSelectedEntityId] = useState<string>(classes[0]?.id || '');
+  const [isPublishing, setIsPublishing] = useState(false);
+  const navigate = useNavigate();
   
   const [conflicts] = useState<Conflict[]>([
     {
@@ -105,14 +108,26 @@ const UpdateDistribute: React.FC<UpdateDistributeProps> = ({
   };
 
   const handlePublish = () => {
-    toast({
-      title: "Timetable Published!",
-      description: "Your timetable has been successfully published and is now available to all users.",
-      variant: "default",
-      duration: 3000,
-    });
+    setIsPublishing(true);
     
-    setTimeout(onFinish, 1000);
+    // Simulate publication process with loading state
+    setTimeout(() => {
+      toast({
+        title: "Timetable Published!",
+        description: "Your timetable has been successfully published and is now available to all users.",
+        variant: "default",
+        duration: 3000,
+      });
+      
+      setIsPublishing(false);
+      
+      // Navigate to the timetables page after a short delay
+      setTimeout(() => {
+        navigate('/timetables');
+      }, 1000);
+      
+      onFinish();
+    }, 1500);
   };
 
   const hasConflicts = conflicts.length > 0;
@@ -128,9 +143,10 @@ const UpdateDistribute: React.FC<UpdateDistributeProps> = ({
             </div>
             <Button 
               onClick={handlePublish}
+              disabled={isPublishing}
               className="bg-purple-600 hover:bg-purple-700 text-white"
             >
-              Publish Timetable
+              {isPublishing ? "Publishing..." : "Publish Timetable"}
             </Button>
           </div>
         </CardHeader>
@@ -141,7 +157,7 @@ const UpdateDistribute: React.FC<UpdateDistributeProps> = ({
               <h2 className="text-xl font-bold text-purple-900">University of Gujrat Timetable</h2>
               <p className="text-sm text-gray-500 flex items-center">
                 <Badge variant="outline" className="mr-2 bg-purple-50">Academic Year 2023-2024</Badge>
-                <Badge variant="outline" className="bg-green-50 text-green-700">Published</Badge>
+                <Badge variant="outline" className="bg-amber-50 text-amber-700">Draft</Badge>
               </p>
             </div>
             
@@ -296,6 +312,19 @@ const UpdateDistribute: React.FC<UpdateDistributeProps> = ({
               <p>Drag and drop lessons to manually update the timetable. Any conflicts will be highlighted in red.</p>
             </div>
             
+            {isPublishing && (
+              <div className="mt-6 p-4 bg-purple-50 border border-purple-200 rounded-md">
+                <div className="flex items-center justify-center">
+                  <div className="animate-pulse flex items-center space-x-3">
+                    <div className="h-3 w-3 bg-purple-600 rounded-full"></div>
+                    <div className="h-3 w-3 bg-purple-600 rounded-full"></div>
+                    <div className="h-3 w-3 bg-purple-600 rounded-full"></div>
+                  </div>
+                  <span className="ml-3 text-purple-700">Publishing your timetable...</span>
+                </div>
+              </div>
+            )}
+            
             <Card className="mt-6 shadow-sm">
               <CardHeader className="py-3 bg-purple-50">
                 <CardTitle className="text-md text-purple-800">Timetable Analysis</CardTitle>
@@ -355,7 +384,13 @@ const UpdateDistribute: React.FC<UpdateDistributeProps> = ({
         
         <CardFooter className="border-t pt-4 flex justify-between">
           <Button variant="outline" onClick={onBack}>Back</Button>
-          <Button onClick={handlePublish} className="bg-purple-600 hover:bg-purple-700 text-white">Publish Timetable</Button>
+          <Button 
+            onClick={handlePublish} 
+            disabled={isPublishing}
+            className="bg-purple-600 hover:bg-purple-700 text-white"
+          >
+            {isPublishing ? "Publishing..." : "Publish Timetable"}
+          </Button>
         </CardFooter>
       </Card>
     </div>

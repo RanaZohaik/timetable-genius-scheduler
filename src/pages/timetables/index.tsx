@@ -5,7 +5,7 @@ import PageHeader from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
-import { Plus, RefreshCw, Printer, FileExport, Edit, Trash2 } from 'lucide-react';
+import { Plus, RefreshCw, Printer, FileText, Edit, Trash2 } from 'lucide-react';
 import { Timetable } from '@/types';
 import TimetableViewer from '@/components/timetables/TimetableViewer';
 import TimetableList from '@/components/timetables/TimetableList';
@@ -141,6 +141,23 @@ const TimetablesPage = () => {
     });
   };
 
+  const handlePublishTimetable = (id: string) => {
+    setTimetables(prev => prev.map(t => 
+      t.id === id ? { ...t, status: 'published', updatedAt: new Date().toISOString() } : t
+    ));
+    
+    toast({
+      title: "Timetable Published",
+      description: "The timetable has been successfully published and is now available to all users.",
+      variant: "default",
+    });
+    
+    // If this is the currently selected timetable, update it
+    if (selectedTimetable?.id === id) {
+      setSelectedTimetable(prev => prev ? { ...prev, status: 'published', updatedAt: new Date().toISOString() } : null);
+    }
+  };
+
   return (
     <Layout>
       <PageHeader 
@@ -153,6 +170,7 @@ const TimetablesPage = () => {
           timetables={timetables} 
           onSelect={handleSelectTimetable} 
           onDelete={handleDeleteTimetable}
+          onPublish={handlePublishTimetable}
         />
       ) : (
         <>
@@ -168,13 +186,34 @@ const TimetablesPage = () => {
                 <Printer className="w-4 h-4 mr-2" /> Print
               </Button>
               <Button variant="outline" onClick={handleExport}>
-                <FileExport className="w-4 h-4 mr-2" /> Export
+                <FileText className="w-4 h-4 mr-2" /> Export
               </Button>
+              {selectedTimetable && selectedTimetable.status !== 'published' && (
+                <Button 
+                  onClick={() => handlePublishTimetable(selectedTimetable.id)}
+                  className="bg-purple-600 hover:bg-purple-700 text-white"
+                >
+                  Publish
+                </Button>
+              )}
             </div>
           </div>
           
           {selectedTimetable && (
-            <TimetableViewer timetable={selectedTimetable} />
+            <>
+              {selectedTimetable.status === 'published' && (
+                <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-md flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                    <span className="text-green-700 font-medium">This timetable is published and available to all users</span>
+                  </div>
+                  <span className="text-sm text-green-600">
+                    Published on {new Date(selectedTimetable.updatedAt).toLocaleDateString()}
+                  </span>
+                </div>
+              )}
+              <TimetableViewer timetable={selectedTimetable} />
+            </>
           )}
         </>
       )}

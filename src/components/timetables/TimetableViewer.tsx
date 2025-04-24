@@ -1,13 +1,11 @@
-
 import React, { useState } from 'react';
 import { Timetable, Subject, ClassGroup, Teacher, Room } from '@/types';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Edit as EditIcon, Trash2 as Trash2Icon } from 'lucide-react';
 
-// Sample data for the demonstration
 const sampleSubjects: Record<string, Subject> = {
   's1': { id: 's1', code: 'PE', name: 'Physical Education', color: 'teal' },
   's2': { id: 's2', code: 'Fr', name: 'French', color: 'green' },
@@ -56,7 +54,6 @@ const TimetableViewer: React.FC<TimetableViewerProps> = ({ timetable }) => {
   const [activeTab, setActiveTab] = useState('events');
   const [selectedClass, setSelectedClass] = useState<string>('c2b');
   
-  // Mock data for classes
   const availableClasses = [
     { id: 'c2b', name: 'Class 2B' },
     { id: 'c3c', name: 'Class 3C' },
@@ -66,11 +63,9 @@ const TimetableViewer: React.FC<TimetableViewerProps> = ({ timetable }) => {
     { id: 'c7g', name: 'Class 7G' },
     { id: 'c8h', name: 'Class 8H' },
   ];
-  
-  // Days of the week for the timetable
+
   const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
-  // Get the cell for a specific period and day
   const getCell = (periodId: string, day: string) => {
     const slot = timetable.slots.find(s => s.periodId === periodId && s.day === day);
     
@@ -85,7 +80,6 @@ const TimetableViewer: React.FC<TimetableViewerProps> = ({ timetable }) => {
       return null;
     }
     
-    // Get color for the subject
     const getSubjectColor = (color: string) => {
       const colorMap: Record<string, string> = {
         'red': 'bg-red-200 text-red-800',
@@ -192,7 +186,7 @@ const TimetableViewer: React.FC<TimetableViewerProps> = ({ timetable }) => {
                         console.log('Edit class', cls.id);
                       }}
                     >
-                      <Edit className="w-4 h-4" />
+                      <EditIcon className="w-4 h-4" />
                     </Button>
                     <Button 
                       variant="ghost" 
@@ -203,7 +197,7 @@ const TimetableViewer: React.FC<TimetableViewerProps> = ({ timetable }) => {
                         console.log('Delete class', cls.id);
                       }}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2Icon className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>

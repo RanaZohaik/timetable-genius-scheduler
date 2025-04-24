@@ -4,7 +4,7 @@ import { Timetable } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Trash2, Eye, Calendar } from 'lucide-react';
+import { Edit, Trash2, Eye, Calendar, Check } from 'lucide-react';
 import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
 
@@ -12,9 +12,12 @@ interface TimetableListProps {
   timetables: Timetable[];
   onSelect: (timetable: Timetable) => void;
   onDelete: (id: string) => void;
+  onPublish: (id: string) => void;
 }
 
-const TimetableList: React.FC<TimetableListProps> = ({ timetables, onSelect, onDelete }) => {
+const TimetableList: React.FC<TimetableListProps> = ({ 
+  timetables, onSelect, onDelete, onPublish 
+}) => {
   const getStatusColor = (status: 'draft' | 'published' | 'archived'): string => {
     switch (status) {
       case 'published':
@@ -83,6 +86,16 @@ const TimetableList: React.FC<TimetableListProps> = ({ timetables, onSelect, onD
                   >
                     <Eye className="w-4 h-4 mr-1" /> View
                   </Button>
+                  {timetable.status !== 'published' && (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-8"
+                      onClick={() => onPublish(timetable.id)}
+                    >
+                      <Check className="w-4 h-4 mr-1" /> Publish
+                    </Button>
+                  )}
                   <Button 
                     variant="outline" 
                     size="sm" 
