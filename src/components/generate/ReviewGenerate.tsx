@@ -2,10 +2,14 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
-import { CheckCircle, AlertCircle, AlertTriangle, ArrowRight, Info, Activity } from 'lucide-react';
+import { CheckCircle, AlertCircle, AlertTriangle, ArrowRight, Info, Activity, ChevronRight } from 'lucide-react';
 import { Teacher, Subject, ClassGroup, Lesson, Room, Period, GenerationSettings, Conflict } from '@/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Progress } from '../ui/progress';
+import { Separator } from '../ui/separator';
+import { Switch } from '../ui/switch';
+import { Badge } from '../ui/badge';
+import { cn } from '@/lib/utils';
 
 interface ReviewGenerateProps {
   subjects: Subject[];
@@ -33,6 +37,7 @@ const ReviewGenerate: React.FC<ReviewGenerateProps> = ({
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [activeTab, setActiveTab] = useState('review');
   
   // Sample conflicts for UI demonstration
   const conflicts: Conflict[] = [
@@ -92,25 +97,45 @@ const ReviewGenerate: React.FC<ReviewGenerateProps> = ({
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="bg-white shadow-md border-purple-100">
         <CardHeader>
-          <CardTitle>Review & Generate Timetable</CardTitle>
-          <CardDescription>Review your data and generate a conflict-free timetable</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-xl text-purple-800">Review & Generate Timetable</CardTitle>
+              <CardDescription>Review your data and generate a conflict-free timetable</CardDescription>
+            </div>
+            {readyToGenerate && !isGenerating && (
+              <Button 
+                onClick={handleGenerateTimetable} 
+                className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2"
+              >
+                Generate Timetable
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </CardHeader>
+        
         <CardContent>
-          <Tabs defaultValue="review">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="review">Review Data</TabsTrigger>
-              <TabsTrigger value="conflicts">Conflicts ({conflicts.length})</TabsTrigger>
-              <TabsTrigger value="settings">Generation Settings</TabsTrigger>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-3 mb-6">
+              <TabsTrigger value="review" className="data-[state=active]:bg-purple-100 data-[state=active]:text-purple-800">
+                Review Data
+              </TabsTrigger>
+              <TabsTrigger value="conflicts" className="data-[state=active]:bg-purple-100 data-[state=active]:text-purple-800">
+                Conflicts ({conflicts.length})
+              </TabsTrigger>
+              <TabsTrigger value="settings" className="data-[state=active]:bg-purple-100 data-[state=active]:text-purple-800">
+                Generation Settings
+              </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="review" className="space-y-4 mt-6">
+            <TabsContent value="review" className="space-y-6 mt-2 animate-fade-in">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card>
+                <Card className="shadow-sm hover:shadow-md transition-shadow">
                   <CardHeader className="py-3">
                     <CardTitle className="text-md flex items-center">
-                      <Info className="h-4 w-4 mr-2" />
+                      <Info className="h-4 w-4 mr-2 text-purple-600" />
                       Summary
                     </CardTitle>
                   </CardHeader>
@@ -150,10 +175,10 @@ const ReviewGenerate: React.FC<ReviewGenerateProps> = ({
                   </CardContent>
                 </Card>
                 
-                <Card>
+                <Card className="shadow-sm hover:shadow-md transition-shadow">
                   <CardHeader className="py-3">
                     <CardTitle className="text-md flex items-center">
-                      <Activity className="h-4 w-4 mr-2" />
+                      <Activity className="h-4 w-4 mr-2 text-purple-600" />
                       Requirements Check
                     </CardTitle>
                   </CardHeader>
@@ -199,7 +224,12 @@ const ReviewGenerate: React.FC<ReviewGenerateProps> = ({
                 </Card>
               </div>
               
-              <Card className={`border ${readyToGenerate ? 'border-green-200 bg-green-50' : 'border-amber-200 bg-amber-50'}`}>
+              <Card className={cn(
+                "border transition-all",
+                readyToGenerate 
+                  ? "border-green-200 bg-green-50 shadow-sm" 
+                  : "border-amber-200 bg-amber-50 shadow-sm"
+              )}>
                 <CardContent className="py-4 px-6">
                   <div className="flex items-start space-x-4">
                     {readyToGenerate ? (
@@ -222,9 +252,9 @@ const ReviewGenerate: React.FC<ReviewGenerateProps> = ({
               </Card>
             </TabsContent>
             
-            <TabsContent value="conflicts" className="space-y-4 mt-6">
+            <TabsContent value="conflicts" className="space-y-4 animate-fade-in">
               {conflicts.length === 0 ? (
-                <Card className="border border-green-200 bg-green-50">
+                <Card className="border border-green-200 bg-green-50 shadow-sm">
                   <CardContent className="py-4 px-6">
                     <div className="flex items-start space-x-4">
                       <CheckCircle className="h-6 w-6 text-green-500 mt-0.5" />
@@ -240,32 +270,42 @@ const ReviewGenerate: React.FC<ReviewGenerateProps> = ({
               ) : (
                 <div className="space-y-3">
                   {conflicts.map((conflict, index) => (
-                    <Card key={index} className={`border ${
+                    <Card key={index} className={cn(
+                      "border shadow-sm transition-all hover:shadow-md",
                       conflict.severity === 'high' 
                         ? 'border-red-200 bg-red-50' 
                         : conflict.severity === 'medium'
                         ? 'border-amber-200 bg-amber-50'
                         : 'border-yellow-200 bg-yellow-50'
-                    }`}>
+                    )}>
                       <CardContent className="py-4 px-6">
                         <div className="flex items-start space-x-4">
-                          <AlertTriangle className={`h-5 w-5 mt-0.5 ${
+                          <AlertTriangle className={cn(
+                            "h-5 w-5 mt-0.5",
                             conflict.severity === 'high' 
                               ? 'text-red-500' 
                               : conflict.severity === 'medium'
                               ? 'text-amber-500'
                               : 'text-yellow-500'
-                          }`} />
-                          <div>
-                            <h3 className="font-medium text-gray-800">
-                              {conflict.type.charAt(0).toUpperCase() + conflict.type.slice(1)} Conflict
-                            </h3>
+                          )} />
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <h3 className="font-medium text-gray-800">
+                                {conflict.type.charAt(0).toUpperCase() + conflict.type.slice(1)} Conflict
+                              </h3>
+                              <Badge variant={conflict.severity === 'high' ? 'destructive' : 'outline'}>
+                                {conflict.severity.toUpperCase()}
+                              </Badge>
+                            </div>
                             <p className="text-sm mt-1 text-gray-600">
                               {conflict.description}
                             </p>
-                            <div className="mt-2">
-                              <Button variant="outline" size="sm">
+                            <div className="mt-3 flex justify-between items-center">
+                              <Button variant="outline" size="sm" className="text-xs">
                                 View Details
+                              </Button>
+                              <Button variant="ghost" size="sm" className="text-xs">
+                                Ignore <ChevronRight className="ml-1 h-3 w-3" />
                               </Button>
                             </div>
                           </div>
@@ -279,13 +319,16 @@ const ReviewGenerate: React.FC<ReviewGenerateProps> = ({
                       The timetable generator will attempt to resolve these conflicts automatically.
                       You can also resolve them manually after generation.
                     </p>
+                    <Button className="bg-purple-600 hover:bg-purple-700">
+                      Resolve All Conflicts
+                    </Button>
                   </div>
                 </div>
               )}
             </TabsContent>
             
-            <TabsContent value="settings" className="space-y-4 mt-6">
-              <Card>
+            <TabsContent value="settings" className="space-y-4 animate-fade-in">
+              <Card className="shadow-sm">
                 <CardHeader className="py-4">
                   <CardTitle className="text-md">Optimization Settings</CardTitle>
                   <CardDescription>
@@ -293,180 +336,118 @@ const ReviewGenerate: React.FC<ReviewGenerateProps> = ({
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="py-2">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="text-sm font-medium">Prioritize Teacher Preferences</h4>
-                        <p className="text-xs text-gray-500">Try to honor teacher's preferred days and times</p>
+                  <div className="space-y-5">
+                    <div className="grid grid-cols-1 gap-4">
+                      <div className="flex items-center justify-between py-2">
+                        <div>
+                          <h4 className="text-sm font-medium">Prioritize Teacher Preferences</h4>
+                          <p className="text-xs text-gray-500">Try to honor teacher's preferred days and times</p>
+                        </div>
+                        <Switch
+                          checked={generationSettings.prioritizeTeacherPreferences}
+                          onCheckedChange={(checked) => handleSettingChange('prioritizeTeacherPreferences', checked)}
+                          className="data-[state=checked]:bg-purple-600"
+                        />
                       </div>
-                      <div className="flex items-center">
-                        <Button 
-                          variant={generationSettings.prioritizeTeacherPreferences ? "default" : "outline"} 
-                          size="sm"
-                          className="rounded-r-none"
-                          onClick={() => handleSettingChange('prioritizeTeacherPreferences', true)}
-                        >
-                          On
-                        </Button>
-                        <Button 
-                          variant={!generationSettings.prioritizeTeacherPreferences ? "default" : "outline"} 
-                          size="sm"
-                          className="rounded-l-none"
-                          onClick={() => handleSettingChange('prioritizeTeacherPreferences', false)}
-                        >
-                          Off
-                        </Button>
+
+                      <Separator />
+                      
+                      <div className="flex items-center justify-between py-2">
+                        <div>
+                          <h4 className="text-sm font-medium">Avoid Teacher Idle Hours</h4>
+                          <p className="text-xs text-gray-500">Minimize periods where teachers have gaps in their schedule</p>
+                        </div>
+                        <Switch
+                          checked={generationSettings.avoidTeacherIdleHours}
+                          onCheckedChange={(checked) => handleSettingChange('avoidTeacherIdleHours', checked)}
+                          className="data-[state=checked]:bg-purple-600"
+                        />
+                      </div>
+
+                      <Separator />
+
+                      <div className="flex items-center justify-between py-2">
+                        <div>
+                          <h4 className="text-sm font-medium">Balance Teacher Load</h4>
+                          <p className="text-xs text-gray-500">Distribute teaching load evenly across the week</p>
+                        </div>
+                        <Switch
+                          checked={generationSettings.balanceTeacherLoad}
+                          onCheckedChange={(checked) => handleSettingChange('balanceTeacherLoad', checked)}
+                          className="data-[state=checked]:bg-purple-600"
+                        />
+                      </div>
+
+                      <Separator />
+
+                      <div className="flex items-center justify-between py-2">
+                        <div>
+                          <h4 className="text-sm font-medium">Maximize Lunch Breaks</h4>
+                          <p className="text-xs text-gray-500">Ensure teachers and classes have lunch breaks when possible</p>
+                        </div>
+                        <Switch
+                          checked={generationSettings.maximizeLunchBreaks}
+                          onCheckedChange={(checked) => handleSettingChange('maximizeLunchBreaks', checked)}
+                          className="data-[state=checked]:bg-purple-600"
+                        />
+                      </div>
+
+                      <Separator />
+
+                      <div className="flex items-center justify-between py-2">
+                        <div>
+                          <h4 className="text-sm font-medium">Minimize Room Changes</h4>
+                          <p className="text-xs text-gray-500">Try to keep classes in the same room when possible</p>
+                        </div>
+                        <Switch
+                          checked={generationSettings.minimizeRoomChanges}
+                          onCheckedChange={(checked) => handleSettingChange('minimizeRoomChanges', checked)}
+                          className="data-[state=checked]:bg-purple-600"
+                        />
+                      </div>
+
+                      <Separator />
+
+                      <div className="flex items-center justify-between py-2">
+                        <div>
+                          <h4 className="text-sm font-medium">Avoid Same Subject on Consecutive Days</h4>
+                          <p className="text-xs text-gray-500">Spread subjects across different days of the week</p>
+                        </div>
+                        <Switch
+                          checked={generationSettings.avoidSameSubjectConsecutiveDays}
+                          onCheckedChange={(checked) => handleSettingChange('avoidSameSubjectConsecutiveDays', checked)}
+                          className="data-[state=checked]:bg-purple-600"
+                        />
+                      </div>
+
+                      <Separator />
+
+                      <div className="flex items-center justify-between py-2">
+                        <div>
+                          <h4 className="text-sm font-medium">Spread Subjects Evenly</h4>
+                          <p className="text-xs text-gray-500">Distribute subjects evenly throughout the week</p>
+                        </div>
+                        <Switch
+                          checked={generationSettings.spreadSubjectsEvenly}
+                          onCheckedChange={(checked) => handleSettingChange('spreadSubjectsEvenly', checked)}
+                          className="data-[state=checked]:bg-purple-600"
+                        />
                       </div>
                     </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="text-sm font-medium">Avoid Teacher Idle Hours</h4>
-                        <p className="text-xs text-gray-500">Minimize periods where teachers have gaps in their schedule</p>
-                      </div>
-                      <div className="flex items-center">
-                        <Button 
-                          variant={generationSettings.avoidTeacherIdleHours ? "default" : "outline"} 
-                          size="sm"
-                          className="rounded-r-none"
-                          onClick={() => handleSettingChange('avoidTeacherIdleHours', true)}
-                        >
-                          On
-                        </Button>
-                        <Button 
-                          variant={!generationSettings.avoidTeacherIdleHours ? "default" : "outline"} 
-                          size="sm"
-                          className="rounded-l-none"
-                          onClick={() => handleSettingChange('avoidTeacherIdleHours', false)}
-                        >
-                          Off
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="text-sm font-medium">Balance Teacher Load</h4>
-                        <p className="text-xs text-gray-500">Distribute teaching load evenly across the week</p>
-                      </div>
-                      <div className="flex items-center">
-                        <Button 
-                          variant={generationSettings.balanceTeacherLoad ? "default" : "outline"} 
-                          size="sm"
-                          className="rounded-r-none"
-                          onClick={() => handleSettingChange('balanceTeacherLoad', true)}
-                        >
-                          On
-                        </Button>
-                        <Button 
-                          variant={!generationSettings.balanceTeacherLoad ? "default" : "outline"} 
-                          size="sm"
-                          className="rounded-l-none"
-                          onClick={() => handleSettingChange('balanceTeacherLoad', false)}
-                        >
-                          Off
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="text-sm font-medium">Maximize Lunch Breaks</h4>
-                        <p className="text-xs text-gray-500">Ensure teachers and classes have lunch breaks when possible</p>
-                      </div>
-                      <div className="flex items-center">
-                        <Button 
-                          variant={generationSettings.maximizeLunchBreaks ? "default" : "outline"} 
-                          size="sm"
-                          className="rounded-r-none"
-                          onClick={() => handleSettingChange('maximizeLunchBreaks', true)}
-                        >
-                          On
-                        </Button>
-                        <Button 
-                          variant={!generationSettings.maximizeLunchBreaks ? "default" : "outline"} 
-                          size="sm"
-                          className="rounded-l-none"
-                          onClick={() => handleSettingChange('maximizeLunchBreaks', false)}
-                        >
-                          Off
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="text-sm font-medium">Minimize Room Changes</h4>
-                        <p className="text-xs text-gray-500">Try to keep classes in the same room when possible</p>
-                      </div>
-                      <div className="flex items-center">
-                        <Button 
-                          variant={generationSettings.minimizeRoomChanges ? "default" : "outline"} 
-                          size="sm"
-                          className="rounded-r-none"
-                          onClick={() => handleSettingChange('minimizeRoomChanges', true)}
-                        >
-                          On
-                        </Button>
-                        <Button 
-                          variant={!generationSettings.minimizeRoomChanges ? "default" : "outline"} 
-                          size="sm"
-                          className="rounded-l-none"
-                          onClick={() => handleSettingChange('minimizeRoomChanges', false)}
-                        >
-                          Off
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="text-sm font-medium">Avoid Same Subject on Consecutive Days</h4>
-                        <p className="text-xs text-gray-500">Spread subjects across different days of the week</p>
-                      </div>
-                      <div className="flex items-center">
-                        <Button 
-                          variant={generationSettings.avoidSameSubjectConsecutiveDays ? "default" : "outline"} 
-                          size="sm"
-                          className="rounded-r-none"
-                          onClick={() => handleSettingChange('avoidSameSubjectConsecutiveDays', true)}
-                        >
-                          On
-                        </Button>
-                        <Button 
-                          variant={!generationSettings.avoidSameSubjectConsecutiveDays ? "default" : "outline"} 
-                          size="sm"
-                          className="rounded-l-none"
-                          onClick={() => handleSettingChange('avoidSameSubjectConsecutiveDays', false)}
-                        >
-                          Off
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="text-sm font-medium">Spread Subjects Evenly</h4>
-                        <p className="text-xs text-gray-500">Distribute subjects evenly throughout the week</p>
-                      </div>
-                      <div className="flex items-center">
-                        <Button 
-                          variant={generationSettings.spreadSubjectsEvenly ? "default" : "outline"} 
-                          size="sm"
-                          className="rounded-r-none"
-                          onClick={() => handleSettingChange('spreadSubjectsEvenly', true)}
-                        >
-                          On
-                        </Button>
-                        <Button 
-                          variant={!generationSettings.spreadSubjectsEvenly ? "default" : "outline"} 
-                          size="sm"
-                          className="rounded-l-none"
-                          onClick={() => handleSettingChange('spreadSubjectsEvenly', false)}
-                        >
-                          Off
-                        </Button>
-                      </div>
+              <Card className="border border-purple-100 bg-purple-50 shadow-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-start space-x-3">
+                    <Info className="h-5 w-5 text-purple-600 mt-0.5" />
+                    <div>
+                      <h3 className="font-medium text-purple-800">Algorithm Performance</h3>
+                      <p className="text-sm text-purple-700 mt-1">
+                        Enabling more optimization settings may increase generation time but produces better results.
+                        For large schools with complex requirements, expect generation to take 1-2 minutes.
+                      </p>
                     </div>
                   </div>
                 </CardContent>
@@ -481,7 +462,7 @@ const ReviewGenerate: React.FC<ReviewGenerateProps> = ({
           {isGenerating ? (
             <div className="flex flex-col items-end space-y-2 w-1/2">
               <div className="w-full">
-                <Progress value={progress} className="h-2 w-full" />
+                <Progress value={progress} className="h-2 w-full bg-gray-200" indicatorClassName="bg-purple-600" />
               </div>
               <span className="text-xs text-gray-500">Generating timetable... {progress}%</span>
             </div>
@@ -489,7 +470,7 @@ const ReviewGenerate: React.FC<ReviewGenerateProps> = ({
             <Button 
               onClick={handleGenerateTimetable} 
               disabled={!readyToGenerate}
-              className="flex items-center"
+              className="bg-purple-600 hover:bg-purple-700 text-white flex items-center"
             >
               Generate Timetable
               <ArrowRight className="ml-2 h-4 w-4" />

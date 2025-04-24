@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent } from '../ui/card';
+import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 import GeneralSetup from './GeneralSetup';
 import SubjectConfiguration from './SubjectConfiguration';
 import TeacherManagement from './TeacherManagement';
@@ -9,7 +10,15 @@ import LessonCreation from './LessonCreation';
 import ReviewGenerate from './ReviewGenerate';
 import UpdateDistribute from './UpdateDistribute';
 import { SchoolInfo, WorkingDay, Period, Subject, Teacher, ClassGroup, Lesson, Room, GenerationSettings, Timetable } from '@/types';
-import { Steps, StepIndicator, StepStatus, StepIcon, StepNumber, StepTitle, StepDescription, StepSeparator } from '../ui/steps';
+import { CheckCircle } from 'lucide-react';
+
+// Enhanced wizard step interface for better UI
+interface WizardStepInfo {
+  id: number;
+  name: string;
+  description: string;
+  icon: React.ReactNode;
+}
 
 enum WizardStep {
   GeneralSetup = 0,
@@ -48,6 +57,52 @@ const TimetableWizard: React.FC = () => {
     slots: [],
     status: 'draft'
   });
+
+  // Define steps with enhanced UI data
+  const steps: WizardStepInfo[] = [
+    { 
+      id: WizardStep.GeneralSetup,
+      name: "General Setup", 
+      description: "School info & periods",
+      icon: <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">1</div>
+    },
+    { 
+      id: WizardStep.SubjectConfiguration,
+      name: "Subjects", 
+      description: "Configure subjects",
+      icon: <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">2</div>
+    },
+    { 
+      id: WizardStep.TeacherManagement,
+      name: "Teachers", 
+      description: "Teacher profiles",
+      icon: <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">3</div>
+    },
+    { 
+      id: WizardStep.ClassSetup,
+      name: "Classes", 
+      description: "Class setup",
+      icon: <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">4</div>
+    },
+    { 
+      id: WizardStep.LessonCreation,
+      name: "Lessons", 
+      description: "Create lessons",
+      icon: <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">5</div>
+    },
+    { 
+      id: WizardStep.ReviewGenerate,
+      name: "Generate", 
+      description: "Review & generate",
+      icon: <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">6</div>
+    },
+    { 
+      id: WizardStep.UpdateDistribute,
+      name: "Distribute", 
+      description: "Share & finalize",
+      icon: <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">7</div>
+    },
+  ];
 
   const handleGeneralSetupComplete = (data: { 
     schoolInfo: SchoolInfo; workingDays: WorkingDay[]; periods: Period[] 
@@ -167,76 +222,55 @@ const TimetableWizard: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <Card className="bg-white">
-        <CardContent className="pt-6 pb-4">
-          <Steps activeStep={currentStep}>
-            <div className="flex justify-between">
-              <StepIndicator>
-                <StepStatus complete={<StepIcon />} incomplete={<StepNumber />} active={<StepNumber />} />
-              </StepIndicator>
-              <StepTitle>General Setup</StepTitle>
-              <StepDescription>School info & periods</StepDescription>
-              <StepSeparator />
+    <div className="space-y-8">
+      <Card className="bg-white shadow-md border-purple-100">
+        <CardContent className="p-6">
+          <div className="flex flex-col space-y-6">
+            {/* Enhanced progress indicator */}
+            <div className="flex justify-between relative">
+              {steps.map((step, index) => (
+                <div key={step.id} className="flex flex-col items-center relative z-10">
+                  <div 
+                    className={`${currentStep >= step.id ? 'bg-purple-600' : 'bg-gray-200'} 
+                              ${currentStep === step.id ? 'ring-4 ring-purple-100' : ''} 
+                              w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300`}
+                    onClick={() => index < currentStep && setCurrentStep(step.id)}
+                  >
+                    {currentStep > step.id ? (
+                      <CheckCircle className="h-5 w-5 text-white" />
+                    ) : (
+                      <span className={`${currentStep >= step.id ? 'text-white' : 'text-gray-500'} text-sm font-medium`}>
+                        {index + 1}
+                      </span>
+                    )}
+                  </div>
+                  
+                  <div className="mt-2 text-center w-24">
+                    <p className={`text-sm font-medium ${currentStep === step.id ? 'text-purple-700' : 'text-gray-600'}`}>
+                      {step.name}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {step.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
+              
+              {/* Step connector line */}
+              <div className="absolute top-5 h-0.5 bg-gray-200 w-full z-0" />
+              <div 
+                className="absolute top-5 h-0.5 bg-purple-600 transition-all duration-500 z-0" 
+                style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
+              />
             </div>
-            
-            <div className="flex justify-between">
-              <StepIndicator>
-                <StepStatus complete={<StepIcon />} incomplete={<StepNumber />} active={<StepNumber />} />
-              </StepIndicator>
-              <StepTitle>Subjects</StepTitle>
-              <StepDescription>Configure subjects</StepDescription>
-              <StepSeparator />
-            </div>
-            
-            <div className="flex justify-between">
-              <StepIndicator>
-                <StepStatus complete={<StepIcon />} incomplete={<StepNumber />} active={<StepNumber />} />
-              </StepIndicator>
-              <StepTitle>Teachers</StepTitle>
-              <StepDescription>Teacher profiles</StepDescription>
-              <StepSeparator />
-            </div>
-            
-            <div className="flex justify-between">
-              <StepIndicator>
-                <StepStatus complete={<StepIcon />} incomplete={<StepNumber />} active={<StepNumber />} />
-              </StepIndicator>
-              <StepTitle>Classes</StepTitle>
-              <StepDescription>Class setup</StepDescription>
-              <StepSeparator />
-            </div>
-            
-            <div className="flex justify-between">
-              <StepIndicator>
-                <StepStatus complete={<StepIcon />} incomplete={<StepNumber />} active={<StepNumber />} />
-              </StepIndicator>
-              <StepTitle>Lessons</StepTitle>
-              <StepDescription>Create lessons</StepDescription>
-              <StepSeparator />
-            </div>
-            
-            <div className="flex justify-between">
-              <StepIndicator>
-                <StepStatus complete={<StepIcon />} incomplete={<StepNumber />} active={<StepNumber />} />
-              </StepIndicator>
-              <StepTitle>Generate</StepTitle>
-              <StepDescription>Review & generate</StepDescription>
-              <StepSeparator />
-            </div>
-            
-            <div className="flex justify-between">
-              <StepIndicator>
-                <StepStatus complete={<StepIcon />} incomplete={<StepNumber />} active={<StepNumber />} />
-              </StepIndicator>
-              <StepTitle>Distribute</StepTitle>
-              <StepDescription>Share & finalize</StepDescription>
-            </div>
-          </Steps>
+          </div>
         </CardContent>
       </Card>
       
-      {getStepContent()}
+      {/* Step content container with enhanced animation */}
+      <div className="transition-all duration-300">
+        {getStepContent()}
+      </div>
     </div>
   );
 };

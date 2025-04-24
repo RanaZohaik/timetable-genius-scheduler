@@ -2,10 +2,12 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
-import { Download, Share, Printer, Mail, AlertCircle, CheckCircle, X } from 'lucide-react';
+import { Download, Share, Printer, Mail, AlertCircle, CheckCircle, X, ExternalLink, Link2 } from 'lucide-react';
 import { Timetable, TimetableSlot, Teacher, ClassGroup, Subject, Room, Conflict } from '@/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Badge } from '../ui/badge';
+import { toast } from '../ui/use-toast';
 
 interface UpdateDistributeProps {
   timetable: Timetable;
@@ -79,52 +81,88 @@ const UpdateDistribute: React.FC<UpdateDistributeProps> = ({
   const timetableData = getEntitySlots();
 
   const handleExport = (format: 'pdf' | 'excel') => {
-    alert(`Exporting timetable as ${format.toUpperCase()}`);
+    toast({
+      title: "Export Started",
+      description: `Exporting timetable as ${format.toUpperCase()}...`,
+      duration: 3000,
+    });
   };
 
   const handleShare = (method: 'email' | 'link') => {
-    alert(`Sharing timetable via ${method}`);
+    if (method === 'email') {
+      toast({
+        title: "Share via Email",
+        description: "Please enter recipient email addresses",
+        duration: 3000,
+      });
+    } else {
+      toast({
+        title: "Link Copied!",
+        description: "Timetable link has been copied to clipboard",
+        duration: 3000,
+      });
+    }
   };
 
   const handlePublish = () => {
-    alert('Timetable published successfully!');
-    onFinish();
+    toast({
+      title: "Timetable Published!",
+      description: "Your timetable has been successfully published and is now available to all users.",
+      variant: "default",
+      duration: 3000,
+    });
+    
+    setTimeout(onFinish, 1000);
   };
 
   const hasConflicts = conflicts.length > 0;
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="bg-white shadow-md border-purple-100">
         <CardHeader>
-          <CardTitle>Update & Distribute Timetable</CardTitle>
-          <CardDescription>Review, edit, and distribute your generated timetable</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-xl text-purple-800">Update & Distribute Timetable</CardTitle>
+              <CardDescription>Review, edit, and distribute your generated timetable</CardDescription>
+            </div>
+            <Button 
+              onClick={handlePublish}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              Publish Timetable
+            </Button>
+          </div>
         </CardHeader>
+        
         <CardContent>
           <div className="flex justify-between items-center mb-6">
             <div className="space-y-2">
-              <h2 className="text-xl font-bold">University of Gujrat Timetable</h2>
-              <p className="text-sm text-gray-500">Academic Year 2023-2024</p>
+              <h2 className="text-xl font-bold text-purple-900">University of Gujrat Timetable</h2>
+              <p className="text-sm text-gray-500 flex items-center">
+                <Badge variant="outline" className="mr-2 bg-purple-50">Academic Year 2023-2024</Badge>
+                <Badge variant="outline" className="bg-green-50 text-green-700">Published</Badge>
+              </p>
             </div>
             
             <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm" onClick={() => handleExport('pdf')}>
+              <Button variant="outline" size="sm" onClick={() => handleExport('pdf')} className="flex items-center">
                 <Download className="h-4 w-4 mr-1" />
                 PDF
               </Button>
-              <Button variant="outline" size="sm" onClick={() => handleExport('excel')}>
+              <Button variant="outline" size="sm" onClick={() => handleExport('excel')} className="flex items-center">
                 <Download className="h-4 w-4 mr-1" />
                 Excel
               </Button>
-              <Button variant="outline" size="sm" onClick={() => handleShare('email')}>
+              <Button variant="outline" size="sm" onClick={() => handleShare('email')} className="flex items-center">
                 <Mail className="h-4 w-4 mr-1" />
                 Email
               </Button>
-              <Button variant="outline" size="sm" onClick={() => handleShare('link')}>
-                <Share className="h-4 w-4 mr-1" />
+              <Button variant="outline" size="sm" onClick={() => handleShare('link')} className="flex items-center">
+                <Link2 className="h-4 w-4 mr-1" />
                 Share
               </Button>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="flex items-center">
                 <Printer className="h-4 w-4 mr-1" />
                 Print
               </Button>
@@ -132,11 +170,11 @@ const UpdateDistribute: React.FC<UpdateDistributeProps> = ({
           </div>
           
           {hasConflicts && (
-            <Card className="border-red-200 bg-red-50 mb-4">
+            <Card className="border-red-200 bg-red-50 mb-4 shadow-sm">
               <CardContent className="py-3 px-4">
                 <div className="flex items-center">
                   <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
-                  <div>
+                  <div className="flex-1">
                     <h3 className="text-sm font-medium text-red-800">
                       {conflicts.length} conflict{conflicts.length > 1 ? 's' : ''} detected
                     </h3>
@@ -156,9 +194,15 @@ const UpdateDistribute: React.FC<UpdateDistributeProps> = ({
             <div className="flex items-center justify-between">
               <Tabs value={selectedView} onValueChange={(v) => setSelectedView(v as any)} className="w-[400px]">
                 <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="class">Class View</TabsTrigger>
-                  <TabsTrigger value="teacher">Teacher View</TabsTrigger>
-                  <TabsTrigger value="room">Room View</TabsTrigger>
+                  <TabsTrigger value="class" className="data-[state=active]:bg-purple-100 data-[state=active]:text-purple-800">
+                    Class View
+                  </TabsTrigger>
+                  <TabsTrigger value="teacher" className="data-[state=active]:bg-purple-100 data-[state=active]:text-purple-800">
+                    Teacher View
+                  </TabsTrigger>
+                  <TabsTrigger value="room" className="data-[state=active]:bg-purple-100 data-[state=active]:text-purple-800">
+                    Room View
+                  </TabsTrigger>
                 </TabsList>
               </Tabs>
               
@@ -167,7 +211,7 @@ const UpdateDistribute: React.FC<UpdateDistributeProps> = ({
                   value={selectedEntityId}
                   onValueChange={setSelectedEntityId}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="border-purple-200 focus:ring-purple-200">
                     <SelectValue placeholder={`Select ${selectedView}`} />
                   </SelectTrigger>
                   <SelectContent>
@@ -191,11 +235,11 @@ const UpdateDistribute: React.FC<UpdateDistributeProps> = ({
               </div>
             </div>
             
-            <div className="border rounded-md overflow-hidden">
-              <div className="grid grid-cols-6 border-b bg-gray-50">
-                <div className="p-2 font-medium text-sm text-gray-600 border-r">Time / Day</div>
+            <div className="border rounded-md overflow-hidden shadow-sm">
+              <div className="grid grid-cols-6 border-b bg-purple-50">
+                <div className="p-2 font-medium text-sm text-purple-800 border-r">Time / Day</div>
                 {days.map(day => (
-                  <div key={day} className="p-2 font-medium text-sm text-gray-600 text-center border-r last:border-r-0">
+                  <div key={day} className="p-2 font-medium text-sm text-purple-800 text-center border-r last:border-r-0">
                     {day}
                   </div>
                 ))}
@@ -209,7 +253,7 @@ const UpdateDistribute: React.FC<UpdateDistributeProps> = ({
                     key={periodId} 
                     className={`grid grid-cols-6 border-b last:border-b-0 ${isBreak ? 'bg-gray-50' : ''}`}
                   >
-                    <div className={`p-2 text-sm border-r ${isBreak ? 'font-medium' : ''}`}>
+                    <div className={`p-2 text-sm border-r ${isBreak ? 'font-medium bg-gray-100' : ''}`}>
                       {isBreak ? (index === 3 ? 'Break' : 'Lunch') : `Period ${index + 1}`}
                       <div className="text-xs text-gray-500">
                         {index === 0 ? '8:00 - 9:00' : 
@@ -229,13 +273,13 @@ const UpdateDistribute: React.FC<UpdateDistributeProps> = ({
                       return (
                         <div 
                           key={day} 
-                          className={`p-2 border-r last:border-r-0 ${isBreak ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
+                          className={`p-2 border-r last:border-r-0 ${isBreak ? 'bg-gray-100' : 'hover:bg-purple-50'}`}
                         >
                           {hasSlot && (
-                            <div className="text-sm p-1 bg-white border rounded shadow-sm cursor-pointer hover:shadow">
-                              <div className="font-medium">{getEntityName('subject', slot!.subjectId!)}</div>
-                              <div className="text-xs flex justify-between">
-                                <span>{getEntityName('teacher', slot!.teacherId!)}</span>
+                            <div className="text-sm p-2 bg-white border rounded shadow-sm cursor-pointer hover:shadow transition-all duration-150 hover:border-purple-300">
+                              <div className="font-medium text-purple-800">{getEntityName('subject', slot!.subjectId!)}</div>
+                              <div className="text-xs flex justify-between mt-1">
+                                <span className="text-gray-700">{getEntityName('teacher', slot!.teacherId!)}</span>
                                 <span className="text-gray-500">{getEntityName('room', slot!.roomId!)}</span>
                               </div>
                             </div>
@@ -248,17 +292,17 @@ const UpdateDistribute: React.FC<UpdateDistributeProps> = ({
               })}
             </div>
             
-            <div className="text-center text-sm text-gray-500">
+            <div className="text-center text-sm text-gray-500 mt-2">
               <p>Drag and drop lessons to manually update the timetable. Any conflicts will be highlighted in red.</p>
             </div>
             
-            <Card>
-              <CardHeader className="py-3">
-                <CardTitle className="text-md">Timetable Analysis</CardTitle>
+            <Card className="mt-6 shadow-sm">
+              <CardHeader className="py-3 bg-purple-50">
+                <CardTitle className="text-md text-purple-800">Timetable Analysis</CardTitle>
               </CardHeader>
-              <CardContent className="py-2">
+              <CardContent className="py-4">
                 <div className="grid grid-cols-3 gap-4">
-                  <div className="border rounded-md p-3">
+                  <div className="border rounded-md p-3 hover:shadow-sm transition-shadow">
                     <h4 className="text-sm font-medium flex items-center">
                       <CheckCircle className="h-4 w-4 text-green-500 mr-1" />
                       Teacher Distribution
@@ -268,7 +312,7 @@ const UpdateDistribute: React.FC<UpdateDistributeProps> = ({
                     </p>
                   </div>
                   
-                  <div className="border rounded-md p-3">
+                  <div className="border rounded-md p-3 hover:shadow-sm transition-shadow">
                     <h4 className="text-sm font-medium flex items-center">
                       <CheckCircle className="h-4 w-4 text-green-500 mr-1" />
                       Room Utilization
@@ -278,7 +322,7 @@ const UpdateDistribute: React.FC<UpdateDistributeProps> = ({
                     </p>
                   </div>
                   
-                  <div className="border rounded-md p-3">
+                  <div className="border rounded-md p-3 hover:shadow-sm transition-shadow">
                     <h4 className="text-sm font-medium flex items-center">
                       <CheckCircle className="h-4 w-4 text-green-500 mr-1" />
                       Subject Distribution
@@ -290,12 +334,28 @@ const UpdateDistribute: React.FC<UpdateDistributeProps> = ({
                 </div>
               </CardContent>
             </Card>
+
+            <Card className="border border-purple-100 bg-purple-50 shadow-sm">
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-3">
+                  <div className="flex-shrink-0">
+                    <ExternalLink className="h-5 w-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-purple-800">Access Options</h3>
+                    <p className="text-sm text-purple-700 mt-1">
+                      This timetable can be accessed online through our portal or mobile app. Teachers and students will receive notifications when published.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </CardContent>
         
         <CardFooter className="border-t pt-4 flex justify-between">
           <Button variant="outline" onClick={onBack}>Back</Button>
-          <Button onClick={handlePublish}>Publish Timetable</Button>
+          <Button onClick={handlePublish} className="bg-purple-600 hover:bg-purple-700 text-white">Publish Timetable</Button>
         </CardFooter>
       </Card>
     </div>
