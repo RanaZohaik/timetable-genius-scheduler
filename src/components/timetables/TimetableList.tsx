@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Edit, Trash2, Eye, Calendar, Check } from 'lucide-react';
 import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface TimetableListProps {
   timetables: Timetable[];
@@ -78,40 +79,63 @@ const TimetableList: React.FC<TimetableListProps> = ({
                 </div>
 
                 <div className="flex justify-end space-x-2 pt-3">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="h-8"
-                    onClick={() => onSelect(timetable)}
-                  >
-                    <Eye className="w-4 h-4 mr-1" /> View
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="h-8"
+                        onClick={() => onSelect(timetable)}
+                      >
+                        <Eye className="w-4 h-4 mr-1" /> View
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>View timetable details</TooltipContent>
+                  </Tooltip>
+                  
                   {timetable.status !== 'published' && (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="h-8"
-                      onClick={() => onPublish(timetable.id)}
-                    >
-                      <Check className="w-4 h-4 mr-1" /> Publish
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="h-8"
+                          onClick={() => onPublish(timetable.id)}
+                        >
+                          <Check className="w-4 h-4 mr-1" /> Publish
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Publish this timetable</TooltipContent>
+                    </Tooltip>
                   )}
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="h-8"
-                    onClick={() => console.log('Edit timetable', timetable.id)}
-                  >
-                    <Edit className="w-4 h-4 mr-1" /> Edit
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="h-8 text-destructive hover:bg-destructive/10"
-                    onClick={() => onDelete(timetable.id)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                  
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="h-8"
+                        onClick={() => console.log('Edit timetable', timetable.id)}
+                      >
+                        <Edit className="w-4 h-4 mr-1" /> Edit
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Edit this timetable</TooltipContent>
+                  </Tooltip>
+                  
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="h-8 text-destructive hover:bg-destructive/10"
+                        onClick={() => onDelete(timetable.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Delete this timetable</TooltipContent>
+                  </Tooltip>
                 </div>
               </div>
             </CardContent>
