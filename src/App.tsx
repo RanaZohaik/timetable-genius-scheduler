@@ -1,7 +1,6 @@
 
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
@@ -24,28 +23,26 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
+    <BrowserRouter>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/generate" element={<GenerateTimetablePage />} />
-          <Route path="/teachers" element={<TeachersPage />} />
-          <Route path="/teachers/substitute" element={<TeacherSubstitutePage />} />
-          <Route path="/classes" element={<ClassesPage />} />
-          <Route path="/subjects" element={<SubjectsPage />} />
-          <Route path="/reports" element={<ReportsPage />} />
-          <Route path="/users" element={<UsersPage />} />
-          <Route path="/users/invite" element={<InviteUsersPage />} />
-          <Route path="/guide" element={<GuidePage />} />
-          <Route path="/demo" element={<DemoPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/generate" element={<GenerateTimetablePage />} />
+        <Route path="/teachers" element={<TeachersPage />} />
+        <Route path="/teachers/substitute" element={<TeacherSubstitutePage />} />
+        <Route path="/classes" element={<ClassesPage />} />
+        <Route path="/subjects" element={<SubjectsPage />} />
+        <Route path="/reports" element={<ReportsPage />} />
+        <Route path="/users" element={<UsersPage />} />
+        <Route path="/users/invite" element={<InviteUsersPage />} />
+        <Route path="/guide" element={<GuidePage />} />
+        <Route path="/demo" element={<DemoPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
   </QueryClientProvider>
 );
 

@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface PageHeaderProps {
   title: string;
@@ -23,10 +24,17 @@ const PageHeader: React.FC<PageHeaderProps> = ({
         {description && <p className="text-gray-500 mt-1">{description}</p>}
       </div>
       {actionLabel && onAction && (
-        <Button onClick={onAction} className="bg-purple-600 hover:bg-purple-700">
-          <Plus className="h-4 w-4 mr-2" />
-          {actionLabel}
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button onClick={onAction} className="bg-purple-600 hover:bg-purple-700">
+              <Plus className="h-4 w-4 mr-2" />
+              {actionLabel}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{actionLabel}</p>
+          </TooltipContent>
+        </Tooltip>
       )}
     </div>
   );

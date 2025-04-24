@@ -1,306 +1,236 @@
 
 import React, { useState } from 'react';
-import Layout from '@/components/Layout';
-import PageHeader from '@/components/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PieChart, Pie, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Cell, ResponsiveContainer } from 'recharts';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { BarChart, LineChart, PieChart, FilterX, Download, Printer } from 'lucide-react';
-import { 
-  BarChart as RechartBar, 
-  Bar, 
-  LineChart as RechartLine, 
-  Line, 
-  PieChart as RechartPie, 
-  Pie, 
-  Cell,
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
-  ResponsiveContainer 
-} from 'recharts';
+import { Download, FileText, Printer, Share2 } from 'lucide-react';
+import Layout from '@/components/Layout';
+import PageHeader from '@/components/PageHeader';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 
-// Mock data for teacher load chart
-const teacherLoadData = [
-  { name: 'Dr. Sarah Johnson', load: 18, expected: 20 },
-  { name: 'Prof. Michael Chen', load: 16, expected: 18 },
-  { name: 'Dr. Emily Rodriguez', load: 20, expected: 20 },
-  { name: 'Prof. James Wilson', load: 12, expected: 15 },
-  { name: 'Dr. Priya Sharma', load: 22, expected: 20 },
-  { name: 'Prof. David Lee', load: 15, expected: 15 },
-  { name: 'Dr. Robert Brown', load: 18, expected: 18 },
-];
+const generateRandomData = () => {
+  // Generate random data for demo purposes
+  const subjects = ['Mathematics', 'English', 'Science', 'History', 'Geography', 'Computer Science', 'Physical Education'];
+  const teacherIds = ['T001', 'T002', 'T003', 'T004', 'T005', 'T006', 'T007'];
+  const teacherNames = ['John Smith', 'Sarah Johnson', 'David Williams', 'Emma Brown', 'Michael Davis', 'Sophia Wilson', 'James Taylor'];
+  
+  const teacherLoad = teacherNames.map((name, index) => ({
+    id: teacherIds[index],
+    name: name,
+    totalHours: Math.floor(Math.random() * 15) + 15,
+    subjectCount: Math.floor(Math.random() * 3) + 1,
+    classCount: Math.floor(Math.random() * 4) + 2,
+  }));
+  
+  const subjectAllocation = subjects.map(subject => ({
+    name: subject,
+    value: Math.floor(Math.random() * 20) + 10,
+  }));
+  
+  return { teacherLoad, subjectAllocation };
+};
 
-// Mock data for room utilization
-const roomUtilizationData = [
-  { name: 'Lab-1', value: 85 },
-  { name: 'Lab-2', value: 70 },
-  { name: 'Room-101', value: 95 },
-  { name: 'Room-102', value: 60 },
-  { name: 'Room-201', value: 75 },
-  { name: 'Room-202', value: 50 },
-];
-
-const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088FE', '#00C49F'];
-
-// Mock data for weekly classes
-const weeklyClassesData = [
-  { day: 'Monday', classes: 42 },
-  { day: 'Tuesday', classes: 38 },
-  { day: 'Wednesday', classes: 45 },
-  { day: 'Thursday', classes: 40 },
-  { day: 'Friday', classes: 35 },
-];
+const COLORS = ['#8884d8', '#83a6ed', '#8dd1e1', '#82ca9d', '#a4de6c', '#d0ed57', '#ffc658'];
 
 const ReportsPage = () => {
-  const [activeTab, setActiveTab] = useState('teacher-load');
-
+  const [timeframe, setTimeframe] = useState<string>('current');
+  const { teacherLoad, subjectAllocation } = generateRandomData();
+  
   return (
     <Layout>
       <PageHeader 
         title="Reports" 
-        description="Generate, view and export various reports related to timetable data"
+        description="Generate and export detailed timetable reports"
       />
       
-      <div className="mb-6 flex items-center justify-between">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="teacher-load">Teacher Load</TabsTrigger>
-            <TabsTrigger value="room-utilization">Room Utilization</TabsTrigger>
-            <TabsTrigger value="weekly-classes">Weekly Classes</TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-3">
-          <Card className="h-full">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {activeTab === 'teacher-load' && <BarChart className="h-5 w-5 text-purple-500" />}
-                  {activeTab === 'room-utilization' && <PieChart className="h-5 w-5 text-blue-500" />}
-                  {activeTab === 'weekly-classes' && <LineChart className="h-5 w-5 text-green-500" />}
-                  <span>
-                    {activeTab === 'teacher-load' && 'Teacher Load Analysis'}
-                    {activeTab === 'room-utilization' && 'Room Utilization'}
-                    {activeTab === 'weekly-classes' && 'Weekly Class Distribution'}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button size="sm" variant="outline">
-                    <Printer className="h-4 w-4 mr-1" />
-                    Print
-                  </Button>
-                  <Button size="sm" variant="outline">
-                    <Download className="h-4 w-4 mr-1" />
-                    Export
-                  </Button>
-                </div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[400px] w-full">
-                {activeTab === 'teacher-load' && (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RechartBar
-                      data={teacherLoadData}
-                      margin={{
-                        top: 20,
-                        right: 30,
-                        left: 20,
-                        bottom: 60,
-                      }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis 
-                        dataKey="name" 
-                        angle={-45} 
-                        textAnchor="end"
-                        height={60}
-                      />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="load" name="Current Load" fill="#8884d8" />
-                      <Bar dataKey="expected" name="Expected Load" fill="#82ca9d" />
-                    </RechartBar>
-                  </ResponsiveContainer>
-                )}
-                
-                {activeTab === 'room-utilization' && (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RechartPie
-                      data={roomUtilizationData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={70}
-                      outerRadius={120}
-                      paddingAngle={1}
-                      dataKey="value"
-                      label={({ name, value }) => `${name}: ${value}%`}
-                    >
-                      {roomUtilizationData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                      <Tooltip formatter={(value) => `${value}%`} />
-                      <Legend />
-                    </RechartPie>
-                  </ResponsiveContainer>
-                )}
-                
-                {activeTab === 'weekly-classes' && (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RechartLine
-                      data={weeklyClassesData}
-                      margin={{
-                        top: 20,
-                        right: 30,
-                        left: 20,
-                        bottom: 5,
-                      }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="day" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Line 
-                        type="monotone" 
-                        dataKey="classes" 
-                        name="Number of Classes" 
-                        stroke="#82ca9d" 
-                        activeDot={{ r: 8 }} 
-                        strokeWidth={2}
-                      />
-                    </RechartLine>
-                  </ResponsiveContainer>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+      <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="w-full sm:w-auto">
+          <Select defaultValue={timeframe} onValueChange={setTimeframe}>
+            <SelectTrigger className="w-full sm:w-[200px]">
+              <SelectValue placeholder="Select timeframe" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="current">Current Term</SelectItem>
+              <SelectItem value="previous">Previous Term</SelectItem>
+              <SelectItem value="next">Next Term (Draft)</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
+        
+        <div className="flex space-x-2 w-full sm:w-auto justify-end">
+          <Button variant="outline" size="sm">
+            <Printer className="mr-2 h-4 w-4" />
+            Print
+          </Button>
+          <Button variant="outline" size="sm">
+            <Download className="mr-2 h-4 w-4" />
+            Export
+          </Button>
+          <Button variant="outline" size="sm">
+            <Share2 className="mr-2 h-4 w-4" />
+            Share
+          </Button>
+        </div>
+      </div>
 
-        <div>
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="text-lg font-medium">Report Settings</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {activeTab === 'teacher-load' && (
-                  <>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Department</label>
-                      <select className="w-full border rounded-md p-2">
-                        <option value="all">All Departments</option>
-                        <option value="cs">Computer Science</option>
-                        <option value="math">Mathematics</option>
-                        <option value="physics">Physics</option>
-                      </select>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Load Type</label>
-                      <select className="w-full border rounded-md p-2">
-                        <option value="weekly">Weekly Hours</option>
-                        <option value="credit">Credit Hours</option>
-                      </select>
-                    </div>
-                  </>
-                )}
-                
-                {activeTab === 'room-utilization' && (
-                  <>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Room Type</label>
-                      <select className="w-full border rounded-md p-2">
-                        <option value="all">All Rooms</option>
-                        <option value="lab">Labs Only</option>
-                        <option value="classroom">Classrooms Only</option>
-                      </select>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Time Period</label>
-                      <select className="w-full border rounded-md p-2">
-                        <option value="week">Current Week</option>
-                        <option value="month">This Month</option>
-                        <option value="term">Full Term</option>
-                      </select>
-                    </div>
-                  </>
-                )}
-                
-                {activeTab === 'weekly-classes' && (
-                  <>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Class</label>
-                      <select className="w-full border rounded-md p-2">
-                        <option value="all">All Classes</option>
-                        <option value="bscs-1a">BSCS-1A</option>
-                        <option value="bscs-1b">BSCS-1B</option>
-                        <option value="bscs-2a">BSCS-2A</option>
-                      </select>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Week</label>
-                      <select className="w-full border rounded-md p-2">
-                        <option value="current">Current Week</option>
-                        <option value="next">Next Week</option>
-                        <option value="previous">Previous Week</option>
-                      </select>
-                    </div>
-                  </>
-                )}
-                
-                <Button className="w-full mt-4">Update Report</Button>
-              </div>
-            </CardContent>
-          </Card>
-
+      <Tabs defaultValue="teacher">
+        <TabsList className="mb-6 grid w-full grid-cols-4">
+          <TabsTrigger value="teacher">Teacher Load</TabsTrigger>
+          <TabsTrigger value="subject">Subject Allocation</TabsTrigger>
+          <TabsTrigger value="class">Class Timetables</TabsTrigger>
+          <TabsTrigger value="utilization">Resource Utilization</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="teacher">
+          <div className="grid gap-6 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Teacher Workload Analysis</CardTitle>
+                <CardDescription>Total hours per week by teacher</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={teacherLoad}
+                      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="totalHours" fill="#8884d8" name="Weekly Hours" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Subject Distribution</CardTitle>
+                <CardDescription>Hours allocation by subject</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[300px] flex justify-center items-center">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={subjectAllocation}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={80}
+                        dataKey="value"
+                        label={({ name, value }) => `${name}: ${value}h`}
+                      >
+                        {subjectAllocation.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="md:col-span-2">
+              <CardHeader>
+                <CardTitle>Teacher Workload Details</CardTitle>
+                <CardDescription>Detailed breakdown of teaching assignments</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="relative overflow-x-auto">
+                  <table className="w-full text-sm text-left text-gray-600">
+                    <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+                      <tr>
+                        <th scope="col" className="px-6 py-3">Teacher ID</th>
+                        <th scope="col" className="px-6 py-3">Teacher Name</th>
+                        <th scope="col" className="px-6 py-3">Total Hours</th>
+                        <th scope="col" className="px-6 py-3">Subjects</th>
+                        <th scope="col" className="px-6 py-3">Classes</th>
+                        <th scope="col" className="px-6 py-3">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {teacherLoad.map((teacher) => (
+                        <tr key={teacher.id} className="bg-white border-b hover:bg-gray-50">
+                          <td className="px-6 py-4">{teacher.id}</td>
+                          <td className="px-6 py-4 font-medium">{teacher.name}</td>
+                          <td className="px-6 py-4">{teacher.totalHours}</td>
+                          <td className="px-6 py-4">{teacher.subjectCount}</td>
+                          <td className="px-6 py-4">{teacher.classCount}</td>
+                          <td className="px-6 py-4">
+                            {teacher.totalHours > 25 ? (
+                              <Badge className="bg-amber-500">Overloaded</Badge>
+                            ) : teacher.totalHours < 18 ? (
+                              <Badge className="bg-blue-500">Underloaded</Badge>
+                            ) : (
+                              <Badge className="bg-green-500">Optimal</Badge>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="mt-4 flex justify-end">
+                  <Button variant="outline" size="sm">
+                    <FileText className="mr-2 h-4 w-4" />
+                    Export Detailed Report
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="subject">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg font-medium">Export Options</CardTitle>
+              <CardTitle>Subject Allocation Reports</CardTitle>
+              <CardDescription>Analysis of subject distribution across classes and teachers</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                <Button variant="outline" className="w-full flex justify-between">
-                  <span>Export as PDF</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                    <path d="M9 15v-2h6v2" />
-                    <path d="M11 13v6" />
-                    <path d="M9 19h4" />
-                  </svg>
-                </Button>
-                
-                <Button variant="outline" className="w-full flex justify-between">
-                  <span>Export as Excel</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                    <line x1="8" y1="13" x2="16" y2="13" />
-                    <line x1="8" y1="17" x2="16" y2="17" />
-                    <line x1="10" y1="9" x2="14" y2="9" />
-                  </svg>
-                </Button>
-                
-                <Button variant="outline" className="w-full flex justify-between">
-                  <span>Save to Dashboard</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                    <line x1="3" y1="9" x2="21" y2="9" />
-                    <rect x="6" y="14" width="3" height="3" />
-                    <rect x="12" y="14" width="3" height="3" />
-                  </svg>
-                </Button>
+              <div className="flex justify-center items-center h-60 text-gray-500 text-lg border-2 border-dashed rounded-lg">
+                Select a subject to view detailed allocation reports
               </div>
             </CardContent>
           </Card>
-        </div>
-      </div>
+        </TabsContent>
+        
+        <TabsContent value="class">
+          <Card>
+            <CardHeader>
+              <CardTitle>Class Timetables</CardTitle>
+              <CardDescription>View and export class-specific schedules</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex justify-center items-center h-60 text-gray-500 text-lg border-2 border-dashed rounded-lg">
+                Select a class to view or export timetable
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="utilization">
+          <Card>
+            <CardHeader>
+              <CardTitle>Resource Utilization</CardTitle>
+              <CardDescription>Classroom and specialist room usage analytics</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex justify-center items-center h-60 text-gray-500 text-lg border-2 border-dashed rounded-lg">
+                Resource utilization data will appear here
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </Layout>
   );
 };
