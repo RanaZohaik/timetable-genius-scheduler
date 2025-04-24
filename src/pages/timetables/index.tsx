@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import Layout from '@/components/Layout';
 import PageHeader from '@/components/PageHeader';
@@ -237,8 +236,8 @@ const TimetablesPage = () => {
   };
 
   return (
-    <DndProvider backend={HTML5Backend}>
-      <Layout>
+    <Layout>
+      <DndProvider backend={HTML5Backend}>
         <PageHeader 
           title="Timetables" 
           description="View, manage, and export your created timetables"
@@ -308,8 +307,8 @@ const TimetablesPage = () => {
             )}
           </>
         )}
-      </Layout>
-    </DndProvider>
+      </DndProvider>
+    </Layout>
   );
 };
 

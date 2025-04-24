@@ -14,19 +14,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const currentPath = location.pathname;
 
   return (
-    <TooltipProvider>
-      <div className="min-h-screen bg-gray-100 flex flex-col">
-        <Header username="Admin" />
-        <div className="flex flex-1">
-          <Sidebar activePath={currentPath} />
-          <main className="flex-1 p-6 overflow-auto">
+    <div className="min-h-screen bg-gray-100 flex flex-col">
+      <Header username="Admin" />
+      <div className="flex flex-1">
+        <Sidebar activePath={currentPath} />
+        <main className="flex-1 p-6 overflow-auto">
+          <TooltipProvider>
             <div className="max-w-6xl mx-auto space-y-6">
               {children}
             </div>
-          </main>
-        </div>
+          </TooltipProvider>
+        </main>
       </div>
-    </TooltipProvider>
+    </div>
   );
 };
 

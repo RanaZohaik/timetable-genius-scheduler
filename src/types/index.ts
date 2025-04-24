@@ -97,6 +97,7 @@ export interface Room {
 
 // Timetable
 export interface TimetableSlot {
+  id: string; // Added id property to fix the error
   day: string;
   periodId: string;
   lessonId?: string;
