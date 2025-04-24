@@ -56,12 +56,13 @@ const UpdateDistribute: React.FC<UpdateDistributeProps> = ({
     // In a real application, this would look up the actual timetable data
     // Here we just create some mock data
     if (Math.random() > 0.3) {
+      const slotId = `slot-${day}-${periodId}-${Math.random().toString(36).substring(2, 9)}`;
       const teacherId = teachers[Math.floor(Math.random() * teachers.length)]?.id;
       const subjectId = subjects[Math.floor(Math.random() * subjects.length)]?.id;
       const classId = classes[Math.floor(Math.random() * classes.length)]?.id;
       const roomId = rooms[Math.floor(Math.random() * rooms.length)]?.id;
       
-      return { day, periodId, teacherId, subjectId, classId, roomId };
+      return { id: slotId, day, periodId, teacherId, subjectId, classId, roomId };
     }
     
     return undefined;
