@@ -98,7 +98,7 @@ const DemoPage = () => {
                         <SelectValue placeholder="Select size" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="small">Small (< 500 students)</SelectItem>
+                        <SelectItem value="small">Small (&lt; 500 students)</SelectItem>
                         <SelectItem value="medium">Medium (500-1500 students)</SelectItem>
                         <SelectItem value="large">Large (1500+ students)</SelectItem>
                       </SelectContent>
