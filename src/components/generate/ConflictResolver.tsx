@@ -9,13 +9,30 @@ import { Conflict } from '@/types';
 export interface ConflictResolverProps {
   conflicts: Conflict[];
   onResolveAll: () => void;
+  onIgnore?: (conflictId: string) => void;
+  onViewDetails?: (conflictId: string) => void;
 }
 
-const ConflictResolver: React.FC<ConflictResolverProps> = ({ conflicts, onResolveAll }) => {
+const ConflictResolver: React.FC<ConflictResolverProps> = ({ 
+  conflicts, 
+  onResolveAll, 
+  onIgnore, 
+  onViewDetails 
+}) => {
   const [expandedConflict, setExpandedConflict] = useState<string | null>(null);
   
   const toggleExpand = (id: string) => {
     setExpandedConflict(expandedConflict === id ? null : id);
+    if (onViewDetails && expandedConflict !== id) {
+      onViewDetails(id);
+    }
+  };
+
+  const handleIgnore = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onIgnore) {
+      onIgnore(id);
+    }
   };
   
   return (
@@ -40,10 +57,13 @@ const ConflictResolver: React.FC<ConflictResolverProps> = ({ conflicts, onResolv
               <CardTitle className="text-base flex items-center">
                 <span 
                   className={`mr-2 w-3 h-3 rounded-full inline-block ${
-                    conflict.resolved ? 'bg-green-500' : 'bg-red-500'
+                    conflict.resolved ? 'bg-green-500' : conflict.severity === 'high' ? 'bg-red-500' : 
+                    conflict.severity === 'medium' ? 'bg-orange-500' : 'bg-yellow-500'
                   }`}
                 />
-                {conflict.type === 'teacher' ? 'Teacher Conflict' : 'Room Conflict'}
+                {conflict.type === 'teacher' ? 'Teacher Conflict' : 
+                 conflict.type === 'room' ? 'Room Conflict' :
+                 conflict.type === 'subject' ? 'Subject Conflict' : 'Class Conflict'}
               </CardTitle>
               <Button 
                 variant="ghost" 
@@ -75,6 +95,12 @@ const ConflictResolver: React.FC<ConflictResolverProps> = ({ conflicts, onResolv
                         ))}
                       </ul>
                     </div>
+                    {conflict.solution && (
+                      <div className="mt-2">
+                        <p className="font-medium">Suggested Solution:</p>
+                        <p className="text-sm text-green-700">{conflict.solution}</p>
+                      </div>
+                    )}
                   </div>
                 </AlertDescription>
               </Alert>

@@ -1,3 +1,4 @@
+
 export interface Timetable {
   id: string;
   name: string;
@@ -14,10 +15,13 @@ export interface Teacher {
   id: string;
   name: string;
   email: string;
-  department: string;
+  department?: string;
   subjects: string[];
   hoursPerWeek: number;
-  availability: {
+  maxHoursPerDay?: number;
+  maxHoursPerWeek?: number;
+  preferences?: any;
+  availability?: {
     monday: { morning: boolean; afternoon: boolean; evening: boolean };
     tuesday: { morning: boolean; afternoon: boolean; evening: boolean };
     wednesday: { morning: boolean; afternoon: boolean; evening: boolean };
@@ -31,20 +35,28 @@ export interface ClassGroup {
   name: string;
   grade: string;
   section: string;
-  roomId: string;
-  classTeacherId: string;
-  students: number;
-  subjects: string[];
+  roomId?: string;
+  classTeacherId?: string;
+  students?: number;
+  numberOfStudents?: number;
+  assignedRoom?: string;
+  specialRequirements?: string[];
+  subjects?: string[];
 }
 
 export interface Subject {
   id: string;
   name: string;
   code: string;
-  hoursPerWeek: number;
-  allowedRooms: string[];
-  assignedTeacherIds: string[];
+  hoursPerWeek?: number;
+  periodsPerWeek?: number;
+  allowedRooms?: string[];
+  assignedTeacherIds?: string[];
+  description?: string;
+  color?: SubjectColor;
 }
+
+export type SubjectColor = 'red' | 'green' | 'blue' | 'yellow' | 'purple' | 'pink' | 'indigo' | 'teal' | 'orange';
 
 export interface Room {
   id: string;
@@ -52,16 +64,66 @@ export interface Room {
   type: string;
   capacity: number;
   facilities: string[];
+  features?: string[];
 }
 
 export interface Conflict {
   id: string;
-  type: 'teacher' | 'room' | 'class' | 'other';
+  type: 'teacher' | 'room' | 'class' | 'other' | 'subject';
   description: string;
   details: {
     day: string;
     time: string;
     items: string[];
   };
-  resolved: boolean;
+  resolved?: boolean;
+  severity?: 'low' | 'medium' | 'high';
+  affectedSlots?: any[];
+  solution?: string;
+}
+
+export interface SchoolInfo {
+  name: string;
+  address: string;
+  email: string;
+  phone: string;
+  website?: string;
+}
+
+export interface WorkingDay {
+  day: string;
+  isWorkingDay: boolean;
+  startTime: string;
+  endTime: string;
+}
+
+export interface Period {
+  id: string;
+  name: string;
+  startTime: string;
+  endTime: string;
+  isBreak: boolean;
+}
+
+export interface Lesson {
+  id: string;
+  subjectId: string;
+  teacherId: string;
+  classId: string;
+  roomId?: string;
+  periodsPerWeek?: number;
+  preferences?: {
+    consecutivePeriods?: boolean;
+    preferredDays?: string[];
+  };
+}
+
+export interface GenerationSettings {
+  prioritizeTeacherPreferences: boolean;
+  avoidTeacherIdleHours: boolean;
+  balanceTeacherLoad: boolean;
+  maximizeLunchBreaks: boolean;
+  minimizeRoomChanges: boolean;
+  avoidSameSubjectConsecutiveDays: boolean;
+  spreadSubjectsEvenly: boolean;
 }

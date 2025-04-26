@@ -1,160 +1,95 @@
 
-import React from 'react';
-import { cn } from '@/lib/utils';
-import { CheckIcon } from 'lucide-react';
+import React from "react";
+import { cn } from "@/lib/utils";
 
-// Steps Component
-interface StepsProps {
-  activeStep: number;
-  children: React.ReactNode;
+export interface StepsProps {
+  steps: { title: string; description: string }[];
+  currentStep: number;
+  onStepClick?: (step: number) => void;
   className?: string;
 }
 
-export const Steps: React.FC<StepsProps> = ({ activeStep, children, className }) => {
-  // Convert children to array to manipulate
-  const childrenArray = React.Children.toArray(children);
-
-  // Clone each child and add props
-  const steps = React.Children.map(childrenArray, (child, index) => {
-    if (React.isValidElement(child)) {
-      return React.cloneElement(child as React.ReactElement, {
-        isActive: activeStep === index,
-        isCompleted: activeStep > index,
-        stepNumber: index + 1,
-      });
-    }
-    return child;
-  });
-
+export function Steps({
+  steps,
+  currentStep,
+  onStepClick,
+  className,
+}: StepsProps) {
   return (
-    <div className={cn("flex flex-col space-y-8", className)}>
-      {steps}
+    <div className={cn("flex w-full justify-between", className)}>
+      {steps.map((step, index) => (
+        <div
+          key={index}
+          className={cn(
+            "flex flex-col items-center space-y-2",
+            index > 0 && "flex-1"
+          )}
+        >
+          <div className="flex items-center space-x-2">
+            {index > 0 && (
+              <div
+                className={cn(
+                  "h-1 w-full flex-1",
+                  index <= currentStep ? "bg-primary" : "bg-gray-200"
+                )}
+              />
+            )}
+
+            <div
+              className={cn(
+                "flex h-8 w-8 items-center justify-center rounded-full border-2 text-sm font-medium",
+                index < currentStep
+                  ? "border-primary bg-primary text-white"
+                  : index === currentStep
+                  ? "border-primary bg-white text-primary"
+                  : "border-gray-300 bg-white text-gray-400"
+              )}
+              onClick={() => onStepClick && onStepClick(index)}
+              role={onStepClick ? "button" : undefined}
+            >
+              {index < currentStep ? (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="h-4 w-4"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M4.5 12.75l6 6 9-13.5"
+                  />
+                </svg>
+              ) : (
+                <span>{index + 1}</span>
+              )}
+            </div>
+
+            {index < steps.length - 1 && (
+              <div
+                className={cn(
+                  "h-1 w-full flex-1",
+                  index < currentStep ? "bg-primary" : "bg-gray-200"
+                )}
+              />
+            )}
+          </div>
+
+          <div className="hidden md:flex flex-col items-center text-center">
+            <span
+              className={cn(
+                "text-sm font-medium",
+                index <= currentStep ? "text-primary" : "text-gray-500"
+              )}
+            >
+              {step.title}
+            </span>
+            <span className="text-xs text-gray-500">{step.description}</span>
+          </div>
+        </div>
+      ))}
     </div>
   );
-};
-
-// Step Indicator Component
-interface StepIndicatorProps {
-  className?: string;
-  children: React.ReactNode;
 }
-
-export const StepIndicator: React.FC<StepIndicatorProps> = ({ className, children }) => {
-  return (
-    <div className={cn("flex items-center justify-center", className)}>
-      {children}
-    </div>
-  );
-};
-
-// Step Status Component
-interface StepStatusProps {
-  complete: React.ReactNode;
-  incomplete: React.ReactNode;
-  active: React.ReactNode;
-  isCompleted?: boolean;
-  isActive?: boolean;
-  className?: string;
-}
-
-export const StepStatus: React.FC<StepStatusProps> = ({ 
-  complete, incomplete, active, isCompleted, isActive, className 
-}) => {
-  let content = incomplete;
-  
-  if (isCompleted) {
-    content = complete;
-  } else if (isActive) {
-    content = active;
-  }
-  
-  return (
-    <div className={cn("", className)}>
-      {content}
-    </div>
-  );
-};
-
-// Step Icon Component
-interface StepIconProps {
-  className?: string;
-}
-
-export const StepIcon: React.FC<StepIconProps> = ({ className }) => {
-  return (
-    <div className={cn("flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground", className)}>
-      <CheckIcon className="w-4 h-4" />
-    </div>
-  );
-};
-
-// Step Number Component
-interface StepNumberProps {
-  className?: string;
-  stepNumber?: number;
-  isActive?: boolean;
-}
-
-export const StepNumber: React.FC<StepNumberProps> = ({ className, stepNumber, isActive }) => {
-  return (
-    <div className={cn(
-      "flex items-center justify-center w-8 h-8 rounded-full border-2 text-sm font-medium",
-      isActive 
-        ? "border-primary bg-primary text-primary-foreground" 
-        : "border-muted-foreground text-muted-foreground",
-      className
-    )}>
-      {stepNumber}
-    </div>
-  );
-};
-
-// Step Title Component
-interface StepTitleProps {
-  className?: string;
-  isActive?: boolean;
-  isCompleted?: boolean;
-  children: React.ReactNode;
-}
-
-export const StepTitle: React.FC<StepTitleProps> = ({ className, isActive, isCompleted, children }) => {
-  return (
-    <div className={cn(
-      "text-sm font-medium",
-      isCompleted ? "text-primary" : isActive ? "text-foreground" : "text-muted-foreground",
-      className
-    )}>
-      {children}
-    </div>
-  );
-};
-
-// Step Description Component
-interface StepDescriptionProps {
-  className?: string;
-  children: React.ReactNode;
-}
-
-export const StepDescription: React.FC<StepDescriptionProps> = ({ className, children }) => {
-  return (
-    <div className={cn("text-sm text-muted-foreground", className)}>
-      {children}
-    </div>
-  );
-};
-
-// Step Separator Component
-interface StepSeparatorProps {
-  className?: string;
-  isCompleted?: boolean;
-}
-
-export const StepSeparator: React.FC<StepSeparatorProps> = ({ className, isCompleted }) => {
-  return (
-    <div className={cn(
-      "flex-1 h-0.5 mx-4 my-auto",
-      isCompleted ? "bg-primary" : "bg-border",
-      className
-    )} />
-  );
-};
