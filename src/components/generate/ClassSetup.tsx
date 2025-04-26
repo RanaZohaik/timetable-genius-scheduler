@@ -1,4 +1,11 @@
-import React from 'react';
+
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Textarea } from '../ui/textarea';
+import { Plus, UploadCloud, X, Check } from 'lucide-react';
 import { ClassGroup, Room, Teacher } from '@/types';
 
 export interface ClassSetupProps {
@@ -11,26 +18,7 @@ export interface ClassSetupProps {
   onNext: () => void;
 }
 
-const ClassSetup: React.FC<ClassSetupProps> = ({ onNext, onBack }) => {
-  const [classes, setClasses] = useState<ClassGroup[]>([
-    { 
-      id: '1', 
-      name: 'Class 9-A', 
-      grade: '9', 
-      section: 'A',
-      numberOfStudents: 30,
-      assignedRoom: 'Room 101'
-    },
-    { 
-      id: '2', 
-      name: 'Class 10-B', 
-      grade: '10', 
-      section: 'B',
-      numberOfStudents: 28,
-      assignedRoom: 'Room 102'
-    },
-  ]);
-
+const ClassSetup: React.FC<ClassSetupProps> = ({ classes, onClassesChange, rooms, onRoomsChange, teachers, onBack, onNext }) => {
   const [newClass, setNewClass] = useState<Partial<ClassGroup>>({
     name: '',
     grade: '',
@@ -62,14 +50,14 @@ const ClassSetup: React.FC<ClassSetupProps> = ({ onNext, onBack }) => {
     const classGroup: ClassGroup = {
       id: (classes.length + 1).toString(),
       name: newClass.name,
-      grade: newClass.grade,
-      section: newClass.section,
+      grade: newClass.grade || '',
+      section: newClass.section || '',
       numberOfStudents: newClass.numberOfStudents,
       assignedRoom: newClass.assignedRoom,
       specialRequirements: newClass.specialRequirements
     };
 
-    setClasses([...classes, classGroup]);
+    onClassesChange([...classes, classGroup]);
     setNewClass({
       name: '',
       grade: '',
@@ -81,7 +69,7 @@ const ClassSetup: React.FC<ClassSetupProps> = ({ onNext, onBack }) => {
   };
 
   const removeClass = (id: string) => {
-    setClasses(classes.filter(cls => cls.id !== id));
+    onClassesChange(classes.filter(cls => cls.id !== id));
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,7 +77,7 @@ const ClassSetup: React.FC<ClassSetupProps> = ({ onNext, onBack }) => {
   };
 
   const handleNext = () => {
-    onNext({ classes });
+    onNext();
   };
 
   const specialRequirementsText = newClass.specialRequirements ? newClass.specialRequirements.join('\n') : '';
@@ -268,7 +256,7 @@ const ClassSetup: React.FC<ClassSetupProps> = ({ onNext, onBack }) => {
         </CardContent>
         <CardFooter className="border-t pt-4 flex justify-between">
           <Button variant="outline" onClick={onBack}>Back</Button>
-          <Button onClick={handleNext}>Next: Lesson Creation</Button>
+          <Button onClick={handleNext}>Next: Teacher Management</Button>
         </CardFooter>
       </Card>
     </div>

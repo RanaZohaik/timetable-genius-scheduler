@@ -33,7 +33,8 @@ const TimetableWizard: React.FC = () => {
     endDate: '',
     status: 'draft',
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
+    slots: [] // Add an empty array for slots
   });
   
   const [teachers, setTeachers] = useState<Teacher[]>([

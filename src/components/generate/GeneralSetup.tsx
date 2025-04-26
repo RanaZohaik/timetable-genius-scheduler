@@ -1,5 +1,40 @@
-import React from 'react';
-import { Timetable, SchoolInfo, WorkingDay, Period } from '@/types';
+
+import React, { useState } from 'react';
+import { Timetable } from '@/types';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { CalendarIcon } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { cn } from '@/lib/utils';
+import { Calendar } from '../ui/calendar';
+import { format } from 'date-fns';
+
+// Define custom interfaces for this component
+interface SchoolInfo {
+  name: string;
+  address: string;
+  email: string;
+  phone: string;
+  website?: string;
+}
+
+interface WorkingDay {
+  day: string;
+  isWorkingDay: boolean;
+  startTime: string;
+  endTime: string;
+}
+
+interface Period {
+  id: string;
+  name: string;
+  startTime: string;
+  endTime: string;
+  isBreak: boolean;
+}
 
 export interface GeneralSetupProps {
   timetable: Timetable;
@@ -7,278 +42,250 @@ export interface GeneralSetupProps {
   onNext: () => void;
 }
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Switch } from '../ui/switch';
-import { Separator } from '../ui/separator';
-import { Plus, Minus, Clock } from 'lucide-react';
-import { SchoolInfo, WorkingDay, Period } from '@/types';
-
-interface GeneralSetupProps {
-  onNext: (data: { schoolInfo: SchoolInfo; workingDays: WorkingDay[]; periods: Period[] }) => void;
-}
-
-const GeneralSetup: React.FC<GeneralSetupProps> = ({ onNext }) => {
+const GeneralSetup: React.FC<GeneralSetupProps> = ({ timetable, onTimetableChange, onNext }) => {
   const [schoolInfo, setSchoolInfo] = useState<SchoolInfo>({
     name: 'University of Gujrat',
-    address: '123 Main St, Gujrat, Pakistan',
+    address: 'Jalalpur Jattan Road, Gujrat, Pakistan',
     email: 'info@uog.edu.pk',
-    phone: '+92 123 4567890',
+    phone: '+92-53-3643112',
     website: 'www.uog.edu.pk'
   });
+  
+  const [startDate, setStartDate] = useState<Date | undefined>(
+    timetable.startDate ? new Date(timetable.startDate) : undefined
+  );
+  
+  const [endDate, setEndDate] = useState<Date | undefined>(
+    timetable.endDate ? new Date(timetable.endDate) : undefined
+  );
 
-  const defaultWorkingDays: WorkingDay[] = [
-    { day: 'Monday', isWorkingDay: true, startTime: '08:00', endTime: '16:00' },
-    { day: 'Tuesday', isWorkingDay: true, startTime: '08:00', endTime: '16:00' },
-    { day: 'Wednesday', isWorkingDay: true, startTime: '08:00', endTime: '16:00' },
-    { day: 'Thursday', isWorkingDay: true, startTime: '08:00', endTime: '16:00' },
-    { day: 'Friday', isWorkingDay: true, startTime: '08:00', endTime: '16:00' },
-    { day: 'Saturday', isWorkingDay: false, startTime: '08:00', endTime: '16:00' },
-    { day: 'Sunday', isWorkingDay: false, startTime: '08:00', endTime: '16:00' }
-  ];
+  const [workingDays, setWorkingDays] = useState<WorkingDay[]>([
+    { day: 'Monday', isWorkingDay: true, startTime: '08:00', endTime: '15:00' },
+    { day: 'Tuesday', isWorkingDay: true, startTime: '08:00', endTime: '15:00' },
+    { day: 'Wednesday', isWorkingDay: true, startTime: '08:00', endTime: '15:00' },
+    { day: 'Thursday', isWorkingDay: true, startTime: '08:00', endTime: '15:00' },
+    { day: 'Friday', isWorkingDay: true, startTime: '08:00', endTime: '14:00' },
+    { day: 'Saturday', isWorkingDay: false, startTime: '08:00', endTime: '13:00' },
+    { day: 'Sunday', isWorkingDay: false, startTime: '08:00', endTime: '13:00' },
+  ]);
 
-  const [workingDays, setWorkingDays] = useState<WorkingDay[]>(defaultWorkingDays);
+  const [periods, setPeriods] = useState<Period[]>([
+    { id: '1', name: 'Period 1', startTime: '08:00', endTime: '08:45', isBreak: false },
+    { id: '2', name: 'Period 2', startTime: '08:45', endTime: '09:30', isBreak: false },
+    { id: '3', name: 'Period 3', startTime: '09:30', endTime: '10:15', isBreak: false },
+    { id: '4', name: 'Break', startTime: '10:15', endTime: '10:45', isBreak: true },
+    { id: '5', name: 'Period 4', startTime: '10:45', endTime: '11:30', isBreak: false },
+    { id: '6', name: 'Period 5', startTime: '11:30', endTime: '12:15', isBreak: false },
+    { id: '7', name: 'Period 6', startTime: '12:15', endTime: '13:00', isBreak: false },
+    { id: '8', name: 'Lunch', startTime: '13:00', endTime: '13:45', isBreak: true },
+    { id: '9', name: 'Period 7', startTime: '13:45', endTime: '14:30', isBreak: false },
+    { id: '10', name: 'Period 8', startTime: '14:30', endTime: '15:15', isBreak: false },
+  ]);
 
-  const defaultPeriods: Period[] = [
-    { id: '1', name: 'Period 1', startTime: '08:00', endTime: '09:00', isBreak: false },
-    { id: '2', name: 'Period 2', startTime: '09:00', endTime: '10:00', isBreak: false },
-    { id: '3', name: 'Break', startTime: '10:00', endTime: '10:30', isBreak: true },
-    { id: '4', name: 'Period 3', startTime: '10:30', endTime: '11:30', isBreak: false },
-    { id: '5', name: 'Period 4', startTime: '11:30', endTime: '12:30', isBreak: false },
-    { id: '6', name: 'Lunch', startTime: '12:30', endTime: '13:30', isBreak: true },
-    { id: '7', name: 'Period 5', startTime: '13:30', endTime: '14:30', isBreak: false },
-    { id: '8', name: 'Period 6', startTime: '14:30', endTime: '15:30', isBreak: false }
-  ];
-
-  const [periods, setPeriods] = useState<Period[]>(defaultPeriods);
-
-  const handleSchoolInfoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setSchoolInfo(prev => ({ ...prev, [name]: value }));
+  const handleTimetableChange = (field: keyof Timetable, value: any) => {
+    onTimetableChange(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
-  const toggleWorkingDay = (index: number) => {
-    const updatedWorkingDays = [...workingDays];
-    updatedWorkingDays[index].isWorkingDay = !updatedWorkingDays[index].isWorkingDay;
-    setWorkingDays(updatedWorkingDays);
-  };
+  const handleDateChange = (field: 'startDate' | 'endDate', date: Date | undefined) => {
+    if (field === 'startDate') {
+      setStartDate(date);
+    } else {
+      setEndDate(date);
+    }
 
-  const handleWorkingDayChange = (index: number, field: 'startTime' | 'endTime', value: string) => {
-    const updatedWorkingDays = [...workingDays];
-    updatedWorkingDays[index][field] = value;
-    setWorkingDays(updatedWorkingDays);
-  };
-
-  const handlePeriodChange = (index: number, field: keyof Period, value: string | boolean) => {
-    const updatedPeriods = [...periods];
-    // @ts-ignore
-    updatedPeriods[index][field] = value;
-    setPeriods(updatedPeriods);
-  };
-
-  const addPeriod = () => {
-    const lastPeriod = periods[periods.length - 1];
-    const newEndTime = lastPeriod ? lastPeriod.endTime : '08:00';
-    const newPeriod: Period = {
-      id: (periods.length + 1).toString(),
-      name: `Period ${periods.filter(p => !p.isBreak).length + 1}`,
-      startTime: newEndTime,
-      endTime: '00:00', // User will need to set this
-      isBreak: false
-    };
-    setPeriods([...periods, newPeriod]);
-  };
-
-  const removePeriod = (index: number) => {
-    if (periods.length > 1) {
-      const updatedPeriods = [...periods];
-      updatedPeriods.splice(index, 1);
-      setPeriods(updatedPeriods);
+    if (date) {
+      handleTimetableChange(field, date.toISOString().split('T')[0]);
     }
   };
 
   const handleNext = () => {
-    onNext({ schoolInfo, workingDays, periods });
+    onNext();
   };
 
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>School Information</CardTitle>
-          <CardDescription>Enter your institution's details</CardDescription>
+          <CardTitle>General Setup</CardTitle>
+          <CardDescription>Configure the basic details for your timetable</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">School Name</Label>
-              <Input 
-                id="name" 
-                name="name"
-                value={schoolInfo.name} 
-                onChange={handleSchoolInfoChange} 
-                placeholder="Enter school name" 
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="address">Address</Label>
-              <Input 
-                id="address" 
-                name="address"
-                value={schoolInfo.address} 
-                onChange={handleSchoolInfoChange} 
-                placeholder="Enter school address" 
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input 
-                id="email" 
-                name="email"
-                type="email" 
-                value={schoolInfo.email} 
-                onChange={handleSchoolInfoChange} 
-                placeholder="Enter school email" 
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone</Label>
-              <Input 
-                id="phone" 
-                name="phone"
-                value={schoolInfo.phone} 
-                onChange={handleSchoolInfoChange} 
-                placeholder="Enter school phone" 
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="website">Website (Optional)</Label>
-              <Input 
-                id="website" 
-                name="website"
-                value={schoolInfo.website} 
-                onChange={handleSchoolInfoChange} 
-                placeholder="Enter school website" 
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Working Days</CardTitle>
-          <CardDescription>Set your institution's working days and hours</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {workingDays.map((day, index) => (
-              <div key={day.day} className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Switch 
-                    checked={day.isWorkingDay} 
-                    onCheckedChange={() => toggleWorkingDay(index)} 
-                    id={`day-${day.day}`} 
-                  />
-                  <Label htmlFor={`day-${day.day}`}>{day.day}</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="flex items-center space-x-2">
-                    <Clock className="h-4 w-4 text-gray-500" />
-                    <Input 
-                      type="time" 
-                      value={day.startTime} 
-                      onChange={(e) => handleWorkingDayChange(index, 'startTime', e.target.value)}
-                      disabled={!day.isWorkingDay}
-                      className="w-24" 
-                    />
-                  </div>
-                  <span className="text-gray-500">to</span>
-                  <div className="flex items-center space-x-2">
-                    <Clock className="h-4 w-4 text-gray-500" />
-                    <Input 
-                      type="time" 
-                      value={day.endTime} 
-                      onChange={(e) => handleWorkingDayChange(index, 'endTime', e.target.value)}
-                      disabled={!day.isWorkingDay}
-                      className="w-24" 
-                    />
-                  </div>
-                </div>
+        <CardContent className="space-y-8">
+          {/* Timetable Basics Section */}
+          <div>
+            <h3 className="text-lg font-medium mb-4">Timetable Basics</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="name">Timetable Name</Label>
+                <Input
+                  id="name"
+                  value={timetable.name}
+                  onChange={(e) => handleTimetableChange('name', e.target.value)}
+                  placeholder="e.g., Spring 2023 Timetable"
+                />
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Periods & Breaks</CardTitle>
-          <CardDescription>Configure your daily periods and breaks</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="grid grid-cols-8 gap-4 font-medium text-sm text-gray-600 px-2">
-              <div className="col-span-2">Period Name</div>
-              <div className="col-span-2">Start Time</div>
-              <div className="col-span-2">End Time</div>
-              <div className="col-span-1">Break</div>
-              <div className="col-span-1"></div>
-            </div>
-            
-            <Separator />
-
-            {periods.map((period, index) => (
-              <div key={period.id} className="grid grid-cols-8 gap-4 items-center">
-                <div className="col-span-2">
-                  <Input 
-                    value={period.name} 
-                    onChange={(e) => handlePeriodChange(index, 'name', e.target.value)} 
-                  />
-                </div>
-                <div className="col-span-2">
-                  <Input 
-                    type="time" 
-                    value={period.startTime} 
-                    onChange={(e) => handlePeriodChange(index, 'startTime', e.target.value)} 
-                  />
-                </div>
-                <div className="col-span-2">
-                  <Input 
-                    type="time" 
-                    value={period.endTime} 
-                    onChange={(e) => handlePeriodChange(index, 'endTime', e.target.value)} 
-                  />
-                </div>
-                <div className="col-span-1 flex justify-center">
-                  <Switch 
-                    checked={period.isBreak} 
-                    onCheckedChange={(checked) => handlePeriodChange(index, 'isBreak', checked)} 
-                  />
-                </div>
-                <div className="col-span-1 flex justify-end">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => removePeriod(index)}
-                  >
-                    <Minus className="h-4 w-4" />
-                  </Button>
-                </div>
+              <div>
+                <Label htmlFor="academicYear">Academic Year</Label>
+                <Input
+                  id="academicYear"
+                  value={timetable.academicYear}
+                  onChange={(e) => handleTimetableChange('academicYear', e.target.value)}
+                  placeholder="e.g., 2023-2024"
+                />
               </div>
-            ))}
+              <div>
+                <Label htmlFor="term">Term / Semester</Label>
+                <Select 
+                  value={timetable.term}
+                  onValueChange={(value) => handleTimetableChange('term', value)}
+                >
+                  <SelectTrigger id="term">
+                    <SelectValue placeholder="Select term" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Fall">Fall Semester</SelectItem>
+                    <SelectItem value="Spring">Spring Semester</SelectItem>
+                    <SelectItem value="Summer">Summer Term</SelectItem>
+                    <SelectItem value="First">First Term</SelectItem>
+                    <SelectItem value="Second">Second Term</SelectItem>
+                    <SelectItem value="Third">Third Term</SelectItem>
+                    <SelectItem value="Fourth">Fourth Term</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <Button variant="outline" className="w-full mt-4 flex items-center" onClick={addPeriod}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Period
-            </Button>
+              <div>
+                <Label htmlFor="status">Status</Label>
+                <Select
+                  value={timetable.status}
+                  onValueChange={(value) => handleTimetableChange('status', value)}
+                >
+                  <SelectTrigger id="status">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="published">Published</SelectItem>
+                    <SelectItem value="archived">Archived</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Start Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !startDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {startDate ? format(startDate, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={startDate}
+                      onSelect={date => handleDateChange('startDate', date)}
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div>
+                <Label>End Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !endDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {endDate ? format(endDate, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={endDate}
+                      onSelect={date => handleDateChange('endDate', date)}
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+          </div>
+
+          {/* School Information Section */}
+          <div>
+            <h3 className="text-lg font-medium mb-4">School Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="schoolName">School Name</Label>
+                <Input
+                  id="schoolName"
+                  value={schoolInfo.name}
+                  onChange={(e) => setSchoolInfo({...schoolInfo, name: e.target.value})}
+                  placeholder="Enter school name"
+                />
+              </div>
+              <div>
+                <Label htmlFor="schoolEmail">School Email</Label>
+                <Input
+                  id="schoolEmail"
+                  type="email"
+                  value={schoolInfo.email}
+                  onChange={(e) => setSchoolInfo({...schoolInfo, email: e.target.value})}
+                  placeholder="Enter school email"
+                />
+              </div>
+              <div>
+                <Label htmlFor="schoolPhone">School Phone Number</Label>
+                <Input
+                  id="schoolPhone"
+                  value={schoolInfo.phone}
+                  onChange={(e) => setSchoolInfo({...schoolInfo, phone: e.target.value})}
+                  placeholder="Enter school phone number"
+                />
+              </div>
+              <div>
+                <Label htmlFor="schoolWebsite">School Website (Optional)</Label>
+                <Input
+                  id="schoolWebsite"
+                  value={schoolInfo.website}
+                  onChange={(e) => setSchoolInfo({...schoolInfo, website: e.target.value})}
+                  placeholder="Enter school website URL"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <Label htmlFor="schoolAddress">School Address</Label>
+                <Input
+                  id="schoolAddress"
+                  value={schoolInfo.address}
+                  onChange={(e) => setSchoolInfo({...schoolInfo, address: e.target.value})}
+                  placeholder="Enter school address"
+                />
+              </div>
+            </div>
           </div>
         </CardContent>
-        <CardFooter className="border-t pt-4 flex justify-end">
-          <Button onClick={handleNext}>Next: Subject Configuration</Button>
+        <CardFooter className="border-t pt-4">
+          <Button onClick={handleNext} className="ml-auto">
+            Next: Class Setup
+          </Button>
         </CardFooter>
       </Card>
     </div>

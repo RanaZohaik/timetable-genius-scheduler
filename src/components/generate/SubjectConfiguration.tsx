@@ -1,4 +1,11 @@
-import React from 'react';
+
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Textarea } from '../ui/textarea';
+import { Plus, UploadCloud, X, Check } from 'lucide-react';
 import { Subject, Teacher, ClassGroup, Room, SubjectColor } from '@/types';
 
 export interface SubjectConfigurationProps {
