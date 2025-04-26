@@ -1,141 +1,67 @@
-// School settings
-export interface SchoolInfo {
-  name: string;
-  address: string;
-  email: string;
-  phone: string;
-  website?: string;
-  logo?: string;
-}
-
-export interface WorkingDay {
-  day: 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday';
-  isWorkingDay: boolean;
-  startTime: string;
-  endTime: string;
-}
-
-export interface Period {
+export interface Timetable {
   id: string;
   name: string;
-  startTime: string;
-  endTime: string;
-  isBreak: boolean;
+  academicYear: string;
+  term: string;
+  startDate: string;
+  endDate: string;
+  status: 'draft' | 'active' | 'archived';
+  createdAt: string;
+  updatedAt: string;
 }
 
-// Subject
-export type SubjectColor = 'red' | 'green' | 'blue' | 'yellow' | 'purple' | 'teal' | 'orange' | 'pink' | 'indigo';
-
-export interface Subject {
-  id: string;
-  code: string;
-  name: string;
-  color: SubjectColor;
-  description?: string;
-  periodsPerWeek?: number;
-  unavailableDays?: string[];
-  unavailableTimeSlots?: string[];
-}
-
-// Teacher
 export interface Teacher {
   id: string;
   name: string;
   email: string;
-  subjects: string[]; // Subject IDs
-  maxHoursPerDay?: number;
-  maxHoursPerWeek?: number;
-  unavailableDays?: string[];
-  unavailableTimeSlots?: string[];
-  preferences?: {
-    preferredStartTime?: string;
-    preferredEndTime?: string;
-    preferredSubjects?: string[]; // Subject IDs
-    consecutivePeriodsLimit?: number;
+  department: string;
+  subjects: string[];
+  hoursPerWeek: number;
+  availability: {
+    monday: { morning: boolean; afternoon: boolean; evening: boolean };
+    tuesday: { morning: boolean; afternoon: boolean; evening: boolean };
+    wednesday: { morning: boolean; afternoon: boolean; evening: boolean };
+    thursday: { morning: boolean; afternoon: boolean; evening: boolean };
+    friday: { morning: boolean; afternoon: boolean; evening: boolean };
   };
 }
 
-// Class
 export interface ClassGroup {
   id: string;
   name: string;
-  grade?: string;
-  section?: string;
-  numberOfStudents?: number;
-  assignedRoom?: string;
-  unavailableDays?: string[];
-  unavailableTimeSlots?: string[];
-  specialRequirements?: string[];
+  grade: string;
+  section: string;
+  roomId: string;
+  classTeacherId: string;
+  students: number;
+  subjects: string[];
 }
 
-// Lesson
-export interface Lesson {
+export interface Subject {
   id: string;
-  subjectId: string;
-  teacherId: string;
-  classId: string;
-  roomId?: string;
-  periodsPerWeek: number;
-  preferences?: {
-    consecutivePeriods?: boolean;
-    preferredDays?: string[];
-    preferredTimeSlots?: string[];
-  };
+  name: string;
+  code: string;
+  hoursPerWeek: number;
+  allowedRooms: string[];
+  assignedTeacherIds: string[];
 }
 
-// Room
 export interface Room {
   id: string;
   name: string;
+  type: string;
   capacity: number;
-  type: 'regular' | 'lab' | 'hall' | 'sports' | 'special';
-  features?: string[];
-  unavailableDays?: string[];
-  unavailableTimeSlots?: string[];
+  facilities: string[];
 }
 
-// Timetable
-export interface TimetableSlot {
-  id: string; // Added id property to fix the error
-  day: string;
-  periodId: string;
-  lessonId?: string;
-  teacherId?: string;
-  subjectId?: string;
-  classId?: string;
-  roomId?: string;
-}
-
-export interface Timetable {
-  id: string;
-  name: string;
-  schoolYear: string;
-  term?: string;
-  startDate?: string;
-  endDate?: string;
-  createdAt: string;
-  updatedAt: string;
-  slots: TimetableSlot[];
-  status: 'draft' | 'published' | 'archived';
-}
-
-// Conflict
 export interface Conflict {
   id: string;
-  type: 'teacher' | 'class' | 'room' | 'time' | 'subject';
+  type: 'teacher' | 'room' | 'class' | 'other';
   description: string;
-  severity: 'low' | 'medium' | 'high';
-  affectedSlots: TimetableSlot[];
-  solution?: string;
-}
-
-// GenerationSettings
-export interface GenerationSettings {
-  prioritizeTeacherPreferences: boolean;
-  avoidTeacherIdleHours: boolean;
-  balanceTeacherLoad: boolean;
-  maximizeLunchBreaks: boolean;
-  minimizeRoomChanges: boolean;
-  avoidSameSubjectConsecutiveDays: boolean;
-  spreadSubjectsEvenly: boolean;
+  details: {
+    day: string;
+    time: string;
+    items: string[];
+  };
+  resolved: boolean;
 }
