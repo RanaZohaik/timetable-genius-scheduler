@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -13,16 +14,17 @@ interface LessonCreationProps {
   teachers: Teacher[];
   subjects: Subject[];
   classes: ClassGroup[];
+  rooms: Room[];
   onNext: (data: { lessons: Lesson[], rooms: Room[] }) => void;
   onBack: () => void;
 }
 
-const LessonCreation: React.FC<LessonCreationProps> = ({ teachers, subjects, classes, onNext, onBack }) => {
-  const [rooms] = useState<Room[]>([
-    { id: '1', name: 'Room 101', capacity: 35, type: 'regular' },
-    { id: '2', name: 'Room 102', capacity: 30, type: 'regular' },
-    { id: '3', name: 'Science Lab', capacity: 25, type: 'lab', features: ['microscopes', 'bunsen burners'] },
-    { id: '4', name: 'Computer Lab', capacity: 30, type: 'lab', features: ['computers', 'projector'] },
+const LessonCreation: React.FC<LessonCreationProps> = ({ teachers, subjects, classes, rooms, onNext, onBack }) => {
+  const [rooms, setRooms] = useState<Room[]>([
+    { id: '1', name: 'Room 101', capacity: 35, type: 'regular', facilities: ['Whiteboard'] },
+    { id: '2', name: 'Room 102', capacity: 30, type: 'regular', facilities: ['Whiteboard'] },
+    { id: '3', name: 'Science Lab', capacity: 25, type: 'lab', facilities: ['Lab Equipment'], features: ['microscopes', 'bunsen burners'] },
+    { id: '4', name: 'Computer Lab', capacity: 30, type: 'lab', facilities: ['Computers'], features: ['computers', 'projector'] },
   ]);
   
   const [lessons, setLessons] = useState<Lesson[]>([

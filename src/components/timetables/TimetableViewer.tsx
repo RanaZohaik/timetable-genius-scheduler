@@ -56,10 +56,10 @@ const sampleSubjects: Record<string, Subject> = {
 };
 
 const sampleRooms: Record<string, Room> = {
-  'r103': { id: 'r103', name: 'Room 103', capacity: 30, type: 'regular' },
-  'r104': { id: 'r104', name: 'Room 104', capacity: 28, type: 'regular' },
-  'r105': { id: 'r105', name: 'Room 105', capacity: 25, type: 'regular' },
-  'r109': { id: 'r109', name: 'Room 109', capacity: 30, type: 'regular' },
+  'r103': { id: 'r103', name: 'Room 103', capacity: 30, type: 'regular', facilities: [] },
+  'r104': { id: 'r104', name: 'Room 104', capacity: 28, type: 'regular', facilities: [] },
+  'r105': { id: 'r105', name: 'Room 105', capacity: 25, type: 'regular', facilities: [] },
+  'r109': { id: 'r109', name: 'Room 109', capacity: 30, type: 'regular', facilities: [] },
 };
 
 const sampleClasses: Record<string, ClassGroup> = {
@@ -69,10 +69,10 @@ const sampleClasses: Record<string, ClassGroup> = {
 };
 
 const sampleTeachers: Record<string, Teacher> = {
-  't1': { id: 't1', name: 'Ms. Johnson', email: 'johnson@school.edu', subjects: ['s1'] },
-  't4': { id: 't4', name: 'Mr. Smith', email: 'smith@school.edu', subjects: ['s2', 's3'] },
-  't6': { id: 't6', name: 'Ms. Garcia', email: 'garcia@school.edu', subjects: ['s4'] },
-  't9': { id: 't9', name: 'Mr. Wilson', email: 'wilson@school.edu', subjects: ['s5'] },
+  't1': { id: 't1', name: 'Ms. Johnson', email: 'johnson@school.edu', subjects: ['s1'], hoursPerWeek: 20 },
+  't4': { id: 't4', name: 'Mr. Smith', email: 'smith@school.edu', subjects: ['s2', 's3'], hoursPerWeek: 20 },
+  't6': { id: 't6', name: 'Ms. Garcia', email: 'garcia@school.edu', subjects: ['s4'], hoursPerWeek: 18 },
+  't9': { id: 't9', name: 'Mr. Wilson', email: 'wilson@school.edu', subjects: ['s5'], hoursPerWeek: 16 },
 };
 
 const samplePeriods = [

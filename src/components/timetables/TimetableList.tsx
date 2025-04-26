@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Timetable } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -90,7 +89,7 @@ const TimetableList: React.FC<TimetableListProps> = ({
                 </Badge>
               </div>
               <CardDescription>
-                {timetable.schoolYear} {timetable.term ? `• ${timetable.term}` : ''}
+                {timetable.academicYear} {timetable.term ? `• ${timetable.term}` : ''}
               </CardDescription>
             </CardHeader>
             <CardContent>

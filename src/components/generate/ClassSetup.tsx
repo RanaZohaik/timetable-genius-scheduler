@@ -1,16 +1,14 @@
+import React from 'react';
+import { ClassGroup, Room, Teacher } from '@/types';
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Plus, UploadCloud, X, Check } from 'lucide-react';
-import { ClassGroup } from '@/types';
-import { Textarea } from '../ui/textarea';
-
-interface ClassSetupProps {
-  onNext: (data: { classes: ClassGroup[] }) => void;
+export interface ClassSetupProps {
+  classes: ClassGroup[];
+  onClassesChange: React.Dispatch<React.SetStateAction<ClassGroup[]>>;
+  rooms: Room[];
+  onRoomsChange: React.Dispatch<React.SetStateAction<Room[]>>;
+  teachers: Teacher[];
   onBack: () => void;
+  onNext: () => void;
 }
 
 const ClassSetup: React.FC<ClassSetupProps> = ({ onNext, onBack }) => {
@@ -45,7 +43,6 @@ const ClassSetup: React.FC<ClassSetupProps> = ({ onNext, onBack }) => {
   const handleNewClassChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     
-    // Special handling for special requirements - convert textarea input to array
     if (name === 'specialRequirements') {
       setNewClass(prev => ({
         ...prev,
@@ -88,7 +85,6 @@ const ClassSetup: React.FC<ClassSetupProps> = ({ onNext, onBack }) => {
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // This is a placeholder for the file upload functionality
     alert('CSV/Excel import functionality would be implemented here');
   };
 
@@ -96,7 +92,6 @@ const ClassSetup: React.FC<ClassSetupProps> = ({ onNext, onBack }) => {
     onNext({ classes });
   };
 
-  // Convert special requirements array back to newline-separated string for textarea display
   const specialRequirementsText = newClass.specialRequirements ? newClass.specialRequirements.join('\n') : '';
 
   return (

@@ -6,9 +6,21 @@ export interface Timetable {
   term: string;
   startDate: string;
   endDate: string;
-  status: 'draft' | 'active' | 'archived';
+  status: 'draft' | 'published' | 'archived';
   createdAt: string;
   updatedAt: string;
+  slots: TimetableSlot[];
+  schoolYear?: string; // For backward compatibility
+}
+
+export interface TimetableSlot {
+  id: string;
+  day: string;
+  periodId: string;
+  teacherId: string;
+  subjectId: string;
+  classId: string;
+  roomId?: string;
 }
 
 export interface Teacher {

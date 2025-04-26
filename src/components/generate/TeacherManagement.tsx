@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -11,17 +10,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 
 interface TeacherManagementProps {
   subjects: Subject[];
+  teachers: Teacher[];
+  onTeachersChange: React.Dispatch<React.SetStateAction<Teacher[]>>;
   onNext: (data: { teachers: Teacher[] }) => void;
   onBack: () => void;
 }
 
-const TeacherManagement: React.FC<TeacherManagementProps> = ({ subjects, onNext, onBack }) => {
+const TeacherManagement: React.FC<TeacherManagementProps> = ({ subjects, teachers, onTeachersChange, onNext, onBack }) => {
   const [teachers, setTeachers] = useState<Teacher[]>([
     { 
       id: '1', 
       name: 'John Doe', 
       email: 'john.doe@uog.edu.pk', 
       subjects: ['1', '3'],
+      hoursPerWeek: 20,
       maxHoursPerDay: 6,
       maxHoursPerWeek: 20
     },
@@ -30,6 +32,7 @@ const TeacherManagement: React.FC<TeacherManagementProps> = ({ subjects, onNext,
       name: 'Jane Smith', 
       email: 'jane.smith@uog.edu.pk', 
       subjects: ['2'],
+      hoursPerWeek: 18,
       maxHoursPerDay: 5,
       maxHoursPerWeek: 18
     },
@@ -70,6 +73,7 @@ const TeacherManagement: React.FC<TeacherManagementProps> = ({ subjects, onNext,
       name: newTeacher.name,
       email: newTeacher.email,
       subjects: newTeacher.subjects || [],
+      hoursPerWeek: newTeacher.maxHoursPerWeek || 20,
       maxHoursPerDay: newTeacher.maxHoursPerDay,
       maxHoursPerWeek: newTeacher.maxHoursPerWeek,
       preferences: newTeacher.preferences
@@ -83,6 +87,7 @@ const TeacherManagement: React.FC<TeacherManagementProps> = ({ subjects, onNext,
       maxHoursPerDay: 6,
       maxHoursPerWeek: 20
     });
+    onTeachersChange([...teachers, teacher]);
   };
 
   const removeTeacher = (id: string) => {
@@ -90,7 +95,6 @@ const TeacherManagement: React.FC<TeacherManagementProps> = ({ subjects, onNext,
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // This is a placeholder for the file upload functionality
     alert('CSV/Excel import functionality would be implemented here');
   };
 

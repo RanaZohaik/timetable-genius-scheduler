@@ -1,95 +1,79 @@
 
-import React from "react";
+import React from 'react';
 import { cn } from "@/lib/utils";
+import { Check, Loader2 } from "lucide-react";
 
-export interface StepsProps {
-  steps: { title: string; description: string }[];
-  currentStep: number;
-  onStepClick?: (step: number) => void;
-  className?: string;
+export interface StepItem {
+  title: string;
+  description: string;
 }
 
-export function Steps({
-  steps,
-  currentStep,
-  onStepClick,
-  className,
-}: StepsProps) {
+export interface StepsProps {
+  steps: StepItem[];
+  currentStep: number;
+  onStepClick?: (step: number) => void;
+}
+
+export function Steps({ steps, currentStep, onStepClick }: StepsProps) {
   return (
-    <div className={cn("flex w-full justify-between", className)}>
-      {steps.map((step, index) => (
-        <div
-          key={index}
-          className={cn(
-            "flex flex-col items-center space-y-2",
-            index > 0 && "flex-1"
-          )}
-        >
-          <div className="flex items-center space-x-2">
-            {index > 0 && (
-              <div
-                className={cn(
-                  "h-1 w-full flex-1",
-                  index <= currentStep ? "bg-primary" : "bg-gray-200"
-                )}
-              />
-            )}
-
-            <div
+    <div className="flex flex-col gap-8">
+      <ol className="space-y-4 md:space-y-0 md:space-x-8 md:flex">
+        {steps.map((step, index) => {
+          const isActive = currentStep === index;
+          const isCompleted = currentStep > index;
+          
+          return (
+            <li 
+              key={step.title}
               className={cn(
-                "flex h-8 w-8 items-center justify-center rounded-full border-2 text-sm font-medium",
-                index < currentStep
-                  ? "border-primary bg-primary text-white"
-                  : index === currentStep
-                  ? "border-primary bg-white text-primary"
-                  : "border-gray-300 bg-white text-gray-400"
+                "relative flex flex-1 flex-col gap-1 md:gap-2 cursor-pointer",
+                {
+                  "opacity-60": !isActive && !isCompleted
+                }
               )}
-              onClick={() => onStepClick && onStepClick(index)}
-              role={onStepClick ? "button" : undefined}
+              onClick={() => onStepClick?.(index)}
             >
-              {index < currentStep ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="h-4 w-4"
+              <div className="flex items-center gap-4">
+                <div
+                  className={cn(
+                    "size-10 rounded-full border-2 inline-flex items-center justify-center shrink-0 text-sm font-medium",
+                    {
+                      "border-primary bg-primary text-primary-foreground": isActive,
+                      "border-green-500 bg-green-500 text-white": isCompleted,
+                      "border-gray-200 bg-gray-50": !isActive && !isCompleted,
+                    }
+                  )}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M4.5 12.75l6 6 9-13.5"
-                  />
-                </svg>
-              ) : (
-                <span>{index + 1}</span>
+                  {isCompleted ? (
+                    <Check className="h-5 w-5" />
+                  ) : (
+                    index + 1
+                  )}
+                </div>
+                
+                <div className="flex flex-col">
+                  <span className={cn(
+                    "text-sm font-medium",
+                    {
+                      "text-primary": isActive,
+                      "text-green-600": isCompleted,
+                    }
+                  )}>
+                    {step.title}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    {step.description}
+                  </span>
+                </div>
+              </div>
+              
+              {index < steps.length - 1 && (
+                <div className="absolute top-5 left-5 -ml-px mt-0.5 h-[calc(100%-20px)] w-0.5 md:h-0.5 md:w-[calc(100%-40px)] md:left-auto md:top-5 md:ml-0 md:mt-0 bg-gray-200" />
               )}
-            </div>
-
-            {index < steps.length - 1 && (
-              <div
-                className={cn(
-                  "h-1 w-full flex-1",
-                  index < currentStep ? "bg-primary" : "bg-gray-200"
-                )}
-              />
-            )}
-          </div>
-
-          <div className="hidden md:flex flex-col items-center text-center">
-            <span
-              className={cn(
-                "text-sm font-medium",
-                index <= currentStep ? "text-primary" : "text-gray-500"
-              )}
-            >
-              {step.title}
-            </span>
-            <span className="text-xs text-gray-500">{step.description}</span>
-          </div>
-        </div>
-      ))}
+            </li>
+          );
+        })}
+      </ol>
     </div>
   );
 }

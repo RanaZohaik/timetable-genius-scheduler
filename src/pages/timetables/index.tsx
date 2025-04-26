@@ -20,7 +20,7 @@ const sampleTimetables: Timetable[] = [
   {
     id: '1',
     name: 'Semester 1 2023-24',
-    schoolYear: '2023-2024',
+    academicYear: '2023-2024',
     term: 'Fall',
     startDate: '2023-09-01',
     endDate: '2023-12-20',
@@ -78,7 +78,7 @@ const sampleTimetables: Timetable[] = [
   {
     id: '2',
     name: 'Semester 2 2023-24',
-    schoolYear: '2023-2024',
+    academicYear: '2023-2024',
     term: 'Spring',
     startDate: '2024-01-10',
     endDate: '2024-05-30',
@@ -90,7 +90,7 @@ const sampleTimetables: Timetable[] = [
   {
     id: '3',
     name: 'Summer School 2024',
-    schoolYear: '2023-2024',
+    academicYear: '2023-2024',
     term: 'Summer',
     startDate: '2024-06-15',
     endDate: '2024-07-30',

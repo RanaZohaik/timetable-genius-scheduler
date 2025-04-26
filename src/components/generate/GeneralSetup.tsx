@@ -1,3 +1,11 @@
+import React from 'react';
+import { Timetable, SchoolInfo, WorkingDay, Period } from '@/types';
+
+export interface GeneralSetupProps {
+  timetable: Timetable;
+  onTimetableChange: React.Dispatch<React.SetStateAction<Timetable>>;
+  onNext: () => void;
+}
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';

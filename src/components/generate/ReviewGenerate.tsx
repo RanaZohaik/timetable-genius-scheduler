@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -47,6 +46,11 @@ const ReviewGenerate: React.FC<ReviewGenerateProps> = ({
       type: 'teacher',
       description: 'John Doe is assigned 22 periods/week which exceeds maximum capacity (20)',
       severity: 'medium',
+      details: {
+        day: 'Monday',
+        time: '9:00 AM - 10:30 AM',
+        items: ['Mathematics - Class 10A', 'Physics - Class 9B']
+      },
       affectedSlots: [],
       solution: 'Redistribute 2 periods to another qualified teacher or reduce the teaching load.'
     },
@@ -55,6 +59,11 @@ const ReviewGenerate: React.FC<ReviewGenerateProps> = ({
       type: 'room',
       description: 'Computer Lab is required for 3 lessons at the same time on Monday',
       severity: 'high',
+      details: {
+        day: 'Monday',
+        time: '11:00 AM - 12:30 PM',
+        items: ['Computer Science - Class 10A', 'Programming - Class 11B', 'IT - Class 9C']
+      },
       affectedSlots: [],
       solution: 'Reschedule one of the computer classes to Tuesday or schedule them in different periods.'
     },
@@ -63,6 +72,11 @@ const ReviewGenerate: React.FC<ReviewGenerateProps> = ({
       type: 'class',
       description: 'Class 3C has Physics and Chemistry scheduled at the same time',
       severity: 'high',
+      details: {
+        day: 'Tuesday',
+        time: '10:00 AM - 11:30 AM',
+        items: ['Physics - Teacher: Mr. Smith', 'Chemistry - Teacher: Ms. Jones']
+      },
       affectedSlots: [],
       solution: 'Move Chemistry class to a different period or day.'
     },
@@ -71,6 +85,11 @@ const ReviewGenerate: React.FC<ReviewGenerateProps> = ({
       type: 'subject',
       description: 'Mathematics occurs on 3 consecutive days, may cause student fatigue',
       severity: 'low',
+      details: {
+        day: 'Monday-Wednesday',
+        time: 'Various',
+        items: ['Monday - Period 2', 'Tuesday - Period 1', 'Wednesday - Period 3']
+      },
       affectedSlots: [],
       solution: 'Distribute Mathematics classes more evenly throughout the week.'
     }

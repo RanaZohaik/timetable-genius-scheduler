@@ -1,26 +1,17 @@
+import React from 'react';
+import { Subject, Teacher, ClassGroup, Room, SubjectColor } from '@/types';
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Plus, UploadCloud, X } from 'lucide-react';
-import { Textarea } from '../ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Subject, SubjectColor } from '@/types';
-
-interface SubjectConfigurationProps {
-  onNext: (data: { subjects: Subject[] }) => void;
+export interface SubjectConfigurationProps {
+  subjects: Subject[];
+  onSubjectsChange: React.Dispatch<React.SetStateAction<Subject[]>>;
+  teachers: Teacher[];
+  classes: ClassGroup[];
+  rooms: Room[];
   onBack: () => void;
+  onNext: () => void;
 }
 
-const SubjectConfiguration: React.FC<SubjectConfigurationProps> = ({ onNext, onBack }) => {
-  const [subjects, setSubjects] = useState<Subject[]>([
-    { id: '1', code: 'MATH101', name: 'Mathematics', color: 'blue', periodsPerWeek: 5 },
-    { id: '2', code: 'ENG101', name: 'English', color: 'green', periodsPerWeek: 4 },
-    { id: '3', code: 'PHY101', name: 'Physics', color: 'red', periodsPerWeek: 3 },
-  ]);
-
+const SubjectConfiguration: React.FC<SubjectConfigurationProps> = ({ subjects, onSubjectsChange, teachers, classes, rooms, onBack, onNext }) => {
   const [newSubject, setNewSubject] = useState<Partial<Subject>>({
     name: '',
     color: 'blue',
@@ -49,7 +40,6 @@ const SubjectConfiguration: React.FC<SubjectConfigurationProps> = ({ onNext, onB
   };
 
   const generateSubjectCode = (name: string): string => {
-    // Generate a simple code from the first 3-4 letters of the subject name + a random number
     if (!name) return '';
     const prefix = name.replace(/[^a-zA-Z]/g, '').substring(0, 3).toUpperCase();
     const randomNum = Math.floor(100 + Math.random() * 900);
@@ -70,22 +60,20 @@ const SubjectConfiguration: React.FC<SubjectConfigurationProps> = ({ onNext, onB
       periodsPerWeek: newSubject.periodsPerWeek
     };
 
-    setSubjects([...subjects, subject]);
+    onSubjectsChange([...subjects, subject]);
     setNewSubject({ name: '', color: 'blue', periodsPerWeek: 3 });
   };
 
   const removeSubject = (id: string) => {
-    setSubjects(subjects.filter(subject => subject.id !== id));
+    onSubjectsChange(subjects.filter(subject => subject.id !== id));
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // This is a placeholder for the file upload functionality
-    // In a real app, you would parse the CSV/Excel file and add subjects
     alert('CSV/Excel import functionality would be implemented here');
   };
 
   const handleNext = () => {
-    onNext({ subjects });
+    onNext();
   };
 
   return (
