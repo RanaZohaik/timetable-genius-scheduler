@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -17,7 +18,8 @@ interface TeacherManagementProps {
 }
 
 const TeacherManagement: React.FC<TeacherManagementProps> = ({ subjects, teachers, onTeachersChange, onNext, onBack }) => {
-  const [teachers, setTeachers] = useState<Teacher[]>([
+  // Rename variable to avoid conflict with props
+  const [localTeachers, setLocalTeachers] = useState<Teacher[]>([
     { 
       id: '1', 
       name: 'John Doe', 
@@ -69,7 +71,7 @@ const TeacherManagement: React.FC<TeacherManagementProps> = ({ subjects, teacher
     if (!newTeacher.name || !newTeacher.email) return;
     
     const teacher: Teacher = {
-      id: (teachers.length + 1).toString(),
+      id: (localTeachers.length + 1).toString(), // Updated to use localTeachers
       name: newTeacher.name,
       email: newTeacher.email,
       subjects: newTeacher.subjects || [],
@@ -79,7 +81,8 @@ const TeacherManagement: React.FC<TeacherManagementProps> = ({ subjects, teacher
       preferences: newTeacher.preferences
     };
 
-    setTeachers([...teachers, teacher]);
+    const updatedTeachers = [...localTeachers, teacher];
+    setLocalTeachers(updatedTeachers);
     setNewTeacher({
       name: '',
       email: '',
@@ -87,11 +90,13 @@ const TeacherManagement: React.FC<TeacherManagementProps> = ({ subjects, teacher
       maxHoursPerDay: 6,
       maxHoursPerWeek: 20
     });
-    onTeachersChange([...teachers, teacher]);
+    onTeachersChange(updatedTeachers);
   };
 
   const removeTeacher = (id: string) => {
-    setTeachers(teachers.filter(teacher => teacher.id !== id));
+    const updatedTeachers = localTeachers.filter(teacher => teacher.id !== id);
+    setLocalTeachers(updatedTeachers);
+    onTeachersChange(updatedTeachers);
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,7 +104,7 @@ const TeacherManagement: React.FC<TeacherManagementProps> = ({ subjects, teacher
   };
 
   const handleNext = () => {
-    onNext({ teachers });
+    onNext({ teachers: localTeachers });
   };
 
   return (
@@ -224,12 +229,12 @@ const TeacherManagement: React.FC<TeacherManagementProps> = ({ subjects, teacher
                 </div>
                 
                 <div className="max-h-[500px] overflow-y-auto">
-                  {teachers.length === 0 ? (
+                  {localTeachers.length === 0 ? (
                     <div className="px-4 py-8 text-center text-gray-500">
                       No teachers added yet
                     </div>
                   ) : (
-                    teachers.map(teacher => (
+                    localTeachers.map(teacher => (
                       <div key={teacher.id} className="grid grid-cols-12 gap-2 px-4 py-3 border-b items-center">
                         <div className="col-span-4 text-sm font-medium">{teacher.name}</div>
                         <div className="col-span-4 text-sm text-gray-600">{teacher.email}</div>

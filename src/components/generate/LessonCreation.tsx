@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -20,7 +19,7 @@ interface LessonCreationProps {
 }
 
 const LessonCreation: React.FC<LessonCreationProps> = ({ teachers, subjects, classes, rooms, onNext, onBack }) => {
-  const [rooms, setRooms] = useState<Room[]>([
+  const [localRooms, setLocalRooms] = useState<Room[]>([
     { id: '1', name: 'Room 101', capacity: 35, type: 'regular', facilities: ['Whiteboard'] },
     { id: '2', name: 'Room 102', capacity: 30, type: 'regular', facilities: ['Whiteboard'] },
     { id: '3', name: 'Science Lab', capacity: 25, type: 'lab', facilities: ['Lab Equipment'], features: ['microscopes', 'bunsen burners'] },
