@@ -1,10 +1,11 @@
+
 import React, { useState, useCallback } from 'react';
 import Layout from '@/components/Layout';
 import PageHeader from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
-import { Plus, RefreshCw, Printer, FileText, Save } from 'lucide-react';
+import { Plus, RefreshCw, Printer, FileText, Save, Calendar } from 'lucide-react';
 import { Timetable, ClassGroup } from '@/types';
 import TimetableViewer from '@/components/timetables/TimetableViewer';
 import TimetableList from '@/components/timetables/TimetableList';
@@ -12,6 +13,7 @@ import ClassEditor from '@/components/timetables/ClassEditor';
 import { useToast } from '@/hooks/use-toast';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { Link } from 'react-router-dom';
 
 // Sample data for demonstration
 const sampleTimetables: Timetable[] = [
@@ -187,6 +189,29 @@ const TimetablesPage = () => {
     setLoading(true);
     
     setTimeout(() => {
+      const timetableToPublish = timetables.find(t => t.id === id);
+      
+      if (!timetableToPublish) {
+        toast({
+          title: "Error",
+          description: "Timetable not found.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+      
+      // Check if timetable has any slots
+      if (timetableToPublish.slots.length === 0) {
+        toast({
+          title: "Cannot publish",
+          description: "Empty timetables cannot be published. Please add timetable entries first.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+      
       setTimetables(prev => prev.map(t => 
         t.id === id ? { ...t, status: 'published', updatedAt: new Date().toISOString() } : t
       ));
@@ -246,6 +271,11 @@ const TimetablesPage = () => {
 
   const handleClassesChange = (updatedClasses: ClassGroup[]) => {
     setClasses(updatedClasses);
+    
+    toast({
+      title: "Classes updated",
+      description: "Class information has been updated successfully."
+    });
   };
 
   const handleSwitchToClasses = () => {
@@ -314,7 +344,8 @@ const TimetablesPage = () => {
                   <Button 
                     onClick={() => handlePublishTimetable(selectedTimetable.id)}
                     className="bg-purple-600 hover:bg-purple-700 text-white"
-                    disabled={loading}
+                    disabled={loading || selectedTimetable.slots.length === 0}
+                    title={selectedTimetable.slots.length === 0 ? "Cannot publish empty timetable" : "Publish timetable"}
                   >
                     {loading ? "Publishing..." : "Publish"}
                   </Button>

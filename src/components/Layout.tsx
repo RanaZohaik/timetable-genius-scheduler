@@ -1,33 +1,24 @@
 
 import React from 'react';
-import Header from '@/components/Header';
-import Sidebar from '@/components/Sidebar';
-import { useLocation } from 'react-router-dom';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { Toaster } from '@/components/ui/toaster';
+import Header from './Header';
+import Sidebar from './Sidebar';
+import Footer from './Footer';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const location = useLocation();
-  const currentPath = location.pathname;
-
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-100">
       <Header username="Admin" />
       <div className="flex flex-1">
-        <Sidebar activePath={currentPath} />
+        <Sidebar activePath="/" />
         <main className="flex-1 p-6 overflow-auto">
-          <TooltipProvider>
-            <div className="max-w-6xl mx-auto space-y-6">
-              {children}
-            </div>
-          </TooltipProvider>
+          {children}
         </main>
       </div>
-      <Toaster />
+      <Footer />
     </div>
   );
 };

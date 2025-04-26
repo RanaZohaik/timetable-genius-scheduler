@@ -2,14 +2,14 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
-import { CheckCircle, AlertCircle, AlertTriangle, ArrowRight, Info, Activity, ChevronRight } from 'lucide-react';
+import { CheckCircle, AlertCircle, ArrowRight, Info, Activity } from 'lucide-react';
 import { Teacher, Subject, ClassGroup, Lesson, Room, Period, GenerationSettings, Conflict } from '@/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Progress } from '../ui/progress';
 import { Separator } from '../ui/separator';
 import { Switch } from '../ui/switch';
-import { Badge } from '../ui/badge';
-import { cn } from '@/lib/utils';
+import ConflictResolver from './ConflictResolver';
+import { useToast } from '@/hooks/use-toast';
 
 interface ReviewGenerateProps {
   subjects: Subject[];
@@ -38,20 +38,41 @@ const ReviewGenerate: React.FC<ReviewGenerateProps> = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
   const [activeTab, setActiveTab] = useState('review');
+  const { toast } = useToast();
   
-  // Sample conflicts for UI demonstration
+  // Enhanced conflicts for UI demonstration with IDs and solutions
   const conflicts: Conflict[] = [
     {
+      id: 'conflict-1',
       type: 'teacher',
       description: 'John Doe is assigned 22 periods/week which exceeds maximum capacity (20)',
       severity: 'medium',
-      affectedSlots: []
+      affectedSlots: [],
+      solution: 'Redistribute 2 periods to another qualified teacher or reduce the teaching load.'
     },
     {
+      id: 'conflict-2',
       type: 'room',
       description: 'Computer Lab is required for 3 lessons at the same time on Monday',
       severity: 'high',
-      affectedSlots: []
+      affectedSlots: [],
+      solution: 'Reschedule one of the computer classes to Tuesday or schedule them in different periods.'
+    },
+    {
+      id: 'conflict-3',
+      type: 'class',
+      description: 'Class 3C has Physics and Chemistry scheduled at the same time',
+      severity: 'high',
+      affectedSlots: [],
+      solution: 'Move Chemistry class to a different period or day.'
+    },
+    {
+      id: 'conflict-4',
+      type: 'subject',
+      description: 'Mathematics occurs on 3 consecutive days, may cause student fatigue',
+      severity: 'low',
+      affectedSlots: [],
+      solution: 'Distribute Mathematics classes more evenly throughout the week.'
     }
   ];
 
@@ -59,9 +80,34 @@ const ReviewGenerate: React.FC<ReviewGenerateProps> = ({
     setGenerationSettings(prev => ({ ...prev, [key]: value }));
   };
 
+  const handleResolveAllConflicts = () => {
+    toast({
+      title: "Conflicts resolved",
+      description: "All conflicts have been automatically resolved based on optimization settings.",
+    });
+    // In a real app, this would apply automatic fixes to the conflicts
+  };
+  
+  const handleIgnoreConflict = (conflictId: string) => {
+    toast({
+      title: "Conflict ignored",
+      description: "This conflict will be ignored during timetable generation.",
+    });
+    // In a real app, this would mark the conflict as ignored
+  };
+  
+  const handleViewConflictDetails = (conflictId: string) => {
+    toast({
+      title: "Viewing conflict details",
+      description: "Showing detailed information about the selected conflict.",
+    });
+    // In a real app, this would show a modal with detailed conflict info
+  };
+
   const handleGenerateTimetable = () => {
     setIsGenerating(true);
     setProgress(0);
+    setActiveTab('review');
     
     // Simulate the generation process
     const interval = setInterval(() => {
@@ -224,18 +270,17 @@ const ReviewGenerate: React.FC<ReviewGenerateProps> = ({
                 </Card>
               </div>
               
-              <Card className={cn(
-                "border transition-all",
+              <Card className={
                 readyToGenerate 
-                  ? "border-green-200 bg-green-50 shadow-sm" 
-                  : "border-amber-200 bg-amber-50 shadow-sm"
-              )}>
+                  ? "border border-green-200 bg-green-50 shadow-sm" 
+                  : "border border-amber-200 bg-amber-50 shadow-sm"
+              }>
                 <CardContent className="py-4 px-6">
                   <div className="flex items-start space-x-4">
                     {readyToGenerate ? (
                       <CheckCircle className="h-6 w-6 text-green-500 mt-0.5 shrink-0" />
                     ) : (
-                      <AlertTriangle className="h-6 w-6 text-amber-500 mt-0.5 shrink-0" />
+                      <AlertCircle className="h-6 w-6 text-amber-500 mt-0.5 shrink-0" />
                     )}
                     <div>
                       <h3 className={`font-medium ${readyToGenerate ? 'text-green-700' : 'text-amber-700'}`}>
@@ -253,78 +298,12 @@ const ReviewGenerate: React.FC<ReviewGenerateProps> = ({
             </TabsContent>
             
             <TabsContent value="conflicts" className="space-y-4 animate-fade-in">
-              {conflicts.length === 0 ? (
-                <Card className="border border-green-200 bg-green-50 shadow-sm">
-                  <CardContent className="py-4 px-6">
-                    <div className="flex items-start space-x-4">
-                      <CheckCircle className="h-6 w-6 text-green-500 mt-0.5" />
-                      <div>
-                        <h3 className="font-medium text-green-700">No Conflicts Detected</h3>
-                        <p className="text-sm mt-1 text-green-600">
-                          Your data looks good! No conflicts or issues were detected.
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-3">
-                  {conflicts.map((conflict, index) => (
-                    <Card key={index} className={cn(
-                      "border shadow-sm transition-all hover:shadow-md",
-                      conflict.severity === 'high' 
-                        ? 'border-red-200 bg-red-50' 
-                        : conflict.severity === 'medium'
-                        ? 'border-amber-200 bg-amber-50'
-                        : 'border-yellow-200 bg-yellow-50'
-                    )}>
-                      <CardContent className="py-4 px-6">
-                        <div className="flex items-start space-x-4">
-                          <AlertTriangle className={cn(
-                            "h-5 w-5 mt-0.5",
-                            conflict.severity === 'high' 
-                              ? 'text-red-500' 
-                              : conflict.severity === 'medium'
-                              ? 'text-amber-500'
-                              : 'text-yellow-500'
-                          )} />
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between">
-                              <h3 className="font-medium text-gray-800">
-                                {conflict.type.charAt(0).toUpperCase() + conflict.type.slice(1)} Conflict
-                              </h3>
-                              <Badge variant={conflict.severity === 'high' ? 'destructive' : 'outline'}>
-                                {conflict.severity.toUpperCase()}
-                              </Badge>
-                            </div>
-                            <p className="text-sm mt-1 text-gray-600">
-                              {conflict.description}
-                            </p>
-                            <div className="mt-3 flex justify-between items-center">
-                              <Button variant="outline" size="sm" className="text-xs">
-                                View Details
-                              </Button>
-                              <Button variant="ghost" size="sm" className="text-xs">
-                                Ignore <ChevronRight className="ml-1 h-3 w-3" />
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                  
-                  <div className="p-4 text-center">
-                    <p className="text-sm text-gray-500 mb-4">
-                      The timetable generator will attempt to resolve these conflicts automatically.
-                      You can also resolve them manually after generation.
-                    </p>
-                    <Button className="bg-purple-600 hover:bg-purple-700">
-                      Resolve All Conflicts
-                    </Button>
-                  </div>
-                </div>
-              )}
+              <ConflictResolver 
+                conflicts={conflicts}
+                onResolveAll={handleResolveAllConflicts}
+                onIgnore={handleIgnoreConflict}
+                onViewDetails={handleViewConflictDetails}
+              />
             </TabsContent>
             
             <TabsContent value="settings" className="space-y-4 animate-fade-in">

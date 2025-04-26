@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -22,30 +21,32 @@ import TimetablesPage from "./pages/timetables";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
-      <Toaster />
-      <Sonner />
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/generate" element={<GenerateTimetablePage />} />
-        <Route path="/timetables" element={<TimetablesPage />} />
-        <Route path="/teachers" element={<TeachersPage />} />
-        <Route path="/teachers/substitute" element={<TeacherSubstitutePage />} />
-        <Route path="/classes" element={<ClassesPage />} />
-        <Route path="/subjects" element={<SubjectsPage />} />
-        <Route path="/reports" element={<ReportsPage />} />
-        <Route path="/users" element={<UsersPage />} />
-        <Route path="/users/invite" element={<InviteUsersPage />} />
-        <Route path="/guide" element={<GuidePage />} />
-        <Route path="/demo" element={<DemoPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </BrowserRouter>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Toaster />
+        <Sonner />
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/generate" element={<GenerateTimetablePage />} />
+          <Route path="/timetables" element={<TimetablesPage />} />
+          <Route path="/teachers" element={<TeachersPage />} />
+          <Route path="/teachers/substitute" element={<TeacherSubstitutePage />} />
+          <Route path="/classes" element={<ClassesPage />} />
+          <Route path="/subjects" element={<SubjectsPage />} />
+          <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/users" element={<UsersPage />} />
+          <Route path="/users/invite" element={<InviteUsersPage />} />
+          <Route path="/guide" element={<GuidePage />} />
+          <Route path="/demo" element={<DemoPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
+}
 
 export default App;

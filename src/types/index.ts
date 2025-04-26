@@ -1,4 +1,3 @@
-
 // School settings
 export interface SchoolInfo {
   name: string;
@@ -122,11 +121,12 @@ export interface Timetable {
 
 // Conflict
 export interface Conflict {
-  type: 'teacher' | 'room' | 'class' | 'subject' | 'constraint';
+  id: string;
+  type: 'teacher' | 'class' | 'room' | 'time' | 'subject';
   description: string;
   severity: 'low' | 'medium' | 'high';
   affectedSlots: TimetableSlot[];
-  suggestions?: any[];
+  solution?: string;
 }
 
 // GenerationSettings
