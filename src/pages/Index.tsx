@@ -1,25 +1,20 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
 import WelcomeBanner from '@/components/WelcomeBanner';
 import DashboardCard from '@/components/DashboardCard';
 import { Link } from 'react-router-dom';
-import { 
-  Calendar, 
-  User, 
-  BookOpen, 
-  School, 
-  Settings, 
-  FileText, 
-  UserCog, 
-  BarChart 
-} from 'lucide-react';
+import { Calendar, User, BookOpen, School, Settings, FileText, UserCog, BarChart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { useQuickStats } from '@/hooks/useQuickStats';
+import { Timetable } from '@/types';
 
 const Index = () => {
+  const [timetables, setTimetables] = useState<Timetable[]>([]);
+  const stats = useQuickStats(timetables);
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <Header username="Admin" />
@@ -30,11 +25,10 @@ const Index = () => {
             <WelcomeBanner
               username="Admin"
               organization="University of Gujrat"
-              timetablesCount={0}
+              timetables={timetables}
             />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Left Panel: Core Timetable Features */}
               <div className="lg:col-span-2 space-y-6">
                 <h2 className="text-lg font-semibold text-gray-800">Core Timetable Features</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -108,7 +102,6 @@ const Index = () => {
                 </Card>
               </div>
               
-              {/* Right Panel: System Configuration & Management */}
               <div className="space-y-6">
                 <h2 className="text-lg font-semibold text-gray-800">System Configuration</h2>
                 <Card>
@@ -181,19 +174,19 @@ const Index = () => {
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
                         <span className="text-gray-600">Teachers</span>
-                        <span className="font-semibold">0</span>
+                        <span className="font-semibold">{stats.teachersCount}</span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-gray-600">Classes</span>
-                        <span className="font-semibold">0</span>
+                        <span className="font-semibold">{stats.classesCount}</span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-gray-600">Subjects</span>
-                        <span className="font-semibold">0</span>
+                        <span className="font-semibold">{stats.subjectsCount}</span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-gray-600">Active Timetables</span>
-                        <span className="font-semibold">0</span>
+                        <span className="font-semibold">{stats.activeTimetablesCount}</span>
                       </div>
                     </div>
                   </CardContent>

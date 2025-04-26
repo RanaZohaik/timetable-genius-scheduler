@@ -1,18 +1,22 @@
 
 import React from 'react';
 import { Card, CardContent } from './ui/card';
+import { useQuickStats } from '@/hooks/useQuickStats';
+import { Timetable } from '@/types';
 
 interface WelcomeBannerProps {
   username: string;
   organization?: string;
-  timetablesCount: number;
+  timetables: Timetable[];
 }
 
 const WelcomeBanner: React.FC<WelcomeBannerProps> = ({ 
   username = 'User', 
   organization = 'Your Organization',
-  timetablesCount = 0 
+  timetables = []
 }) => {
+  const stats = useQuickStats(timetables);
+
   return (
     <Card className="mb-6">
       <CardContent className="pt-6 pb-4 px-6">
@@ -37,7 +41,7 @@ const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
               <div className="w-4 h-4 rounded-full bg-green-100 flex items-center justify-center">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
               </div>
-              <span className="text-sm text-gray-600">Timetables Created: <span className="font-medium">{timetablesCount}</span></span>
+              <span className="text-sm text-gray-600">Timetables Created: <span className="font-medium">{timetables.length}</span></span>
             </div>
           </div>
         </div>
