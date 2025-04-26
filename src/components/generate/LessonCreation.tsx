@@ -14,7 +14,7 @@ interface LessonCreationProps {
   subjects: Subject[];
   classes: ClassGroup[];
   rooms: Room[];
-  onNext: (data: { lessons: Lesson[], rooms: Room[] }) => void;
+  onNext: () => void;
   onBack: () => void;
 }
 
@@ -22,8 +22,8 @@ const LessonCreation: React.FC<LessonCreationProps> = ({ teachers, subjects, cla
   const [localRooms, setLocalRooms] = useState<Room[]>([
     { id: '1', name: 'Room 101', capacity: 35, type: 'regular', facilities: ['Whiteboard'] },
     { id: '2', name: 'Room 102', capacity: 30, type: 'regular', facilities: ['Whiteboard'] },
-    { id: '3', name: 'Science Lab', capacity: 25, type: 'lab', facilities: ['Lab Equipment'], features: ['microscopes', 'bunsen burners'] },
-    { id: '4', name: 'Computer Lab', capacity: 30, type: 'lab', facilities: ['Computers'], features: ['computers', 'projector'] },
+    { id: '3', name: 'Science Lab', capacity: 25, type: 'lab', facilities: ['Lab Equipment'] },
+    { id: '4', name: 'Computer Lab', capacity: 30, type: 'lab', facilities: ['Computers'] },
   ]);
   
   const [lessons, setLessons] = useState<Lesson[]>([
@@ -112,10 +112,10 @@ const LessonCreation: React.FC<LessonCreationProps> = ({ teachers, subjects, cla
   const getTeacherById = (id: string) => teachers.find(t => t.id === id);
   const getSubjectById = (id: string) => subjects.find(s => s.id === id);
   const getClassById = (id: string) => classes.find(c => c.id === id);
-  const getRoomById = (id: string) => rooms.find(r => r.id === id);
+  const getRoomById = (id: string) => localRooms.find(r => r.id === id);
 
   const handleNext = () => {
-    onNext({ lessons, rooms });
+    onNext();
   };
 
   const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -206,7 +206,7 @@ const LessonCreation: React.FC<LessonCreationProps> = ({ teachers, subjects, cla
                       <SelectValue placeholder="Select a room" />
                     </SelectTrigger>
                     <SelectContent>
-                      {rooms.map((room) => (
+                      {localRooms.map((room) => (
                         <SelectItem key={room.id} value={room.id}>
                           {room.name} ({room.type})
                         </SelectItem>

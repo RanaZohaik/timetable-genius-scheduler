@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import GenerateTimetablePage from "./pages/generate";
+import { TooltipProvider } from "./components/ui/tooltip-provider";
 
 // Import all the pages
 import TeachersPage from "./pages/teachers";
@@ -65,34 +66,36 @@ const PublicRoute = ({ children }: { children: JSX.Element }) => {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <Toaster />
-        <Sonner />
-        <Routes>
-          {/* Public routes */}
-          <Route path="/auth/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
-          <Route path="/auth/forgot-password" element={<PublicRoute><ForgotPasswordPage /></PublicRoute>} />
-          
-          {/* Protected routes */}
-          <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-          <Route path="/generate" element={<ProtectedRoute><GenerateTimetablePage /></ProtectedRoute>} />
-          <Route path="/timetables" element={<ProtectedRoute><TimetablesPage /></ProtectedRoute>} />
-          <Route path="/teachers" element={<ProtectedRoute><TeachersPage /></ProtectedRoute>} />
-          <Route path="/teachers/substitute" element={<ProtectedRoute><TeacherSubstitutePage /></ProtectedRoute>} />
-          <Route path="/classes" element={<ProtectedRoute><ClassesPage /></ProtectedRoute>} />
-          <Route path="/subjects" element={<ProtectedRoute><SubjectsPage /></ProtectedRoute>} />
-          <Route path="/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
-          <Route path="/users" element={<ProtectedRoute><UsersPage /></ProtectedRoute>} />
-          <Route path="/users/invite" element={<ProtectedRoute><InviteUsersPage /></ProtectedRoute>} />
-          <Route path="/guide" element={<ProtectedRoute><GuidePage /></ProtectedRoute>} />
-          <Route path="/demo" element={<ProtectedRoute><DemoPage /></ProtectedRoute>} />
-          <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-          
-          {/* Catch-all route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <TooltipProvider>
+        <BrowserRouter>
+          <Toaster />
+          <Sonner />
+          <Routes>
+            {/* Public routes */}
+            <Route path="/auth/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+            <Route path="/auth/forgot-password" element={<PublicRoute><ForgotPasswordPage /></PublicRoute>} />
+            
+            {/* Protected routes */}
+            <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+            <Route path="/generate" element={<ProtectedRoute><GenerateTimetablePage /></ProtectedRoute>} />
+            <Route path="/timetables" element={<ProtectedRoute><TimetablesPage /></ProtectedRoute>} />
+            <Route path="/teachers" element={<ProtectedRoute><TeachersPage /></ProtectedRoute>} />
+            <Route path="/teachers/substitute" element={<ProtectedRoute><TeacherSubstitutePage /></ProtectedRoute>} />
+            <Route path="/classes" element={<ProtectedRoute><ClassesPage /></ProtectedRoute>} />
+            <Route path="/subjects" element={<ProtectedRoute><SubjectsPage /></ProtectedRoute>} />
+            <Route path="/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
+            <Route path="/users" element={<ProtectedRoute><UsersPage /></ProtectedRoute>} />
+            <Route path="/users/invite" element={<ProtectedRoute><InviteUsersPage /></ProtectedRoute>} />
+            <Route path="/guide" element={<ProtectedRoute><GuidePage /></ProtectedRoute>} />
+            <Route path="/demo" element={<ProtectedRoute><DemoPage /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+            
+            {/* Catch-all route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
     </QueryClientProvider>
   );
 }

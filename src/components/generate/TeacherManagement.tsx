@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -13,12 +12,11 @@ interface TeacherManagementProps {
   subjects: Subject[];
   teachers: Teacher[];
   onTeachersChange: React.Dispatch<React.SetStateAction<Teacher[]>>;
-  onNext: (data: { teachers: Teacher[] }) => void;
+  onNext: () => void;
   onBack: () => void;
 }
 
 const TeacherManagement: React.FC<TeacherManagementProps> = ({ subjects, teachers, onTeachersChange, onNext, onBack }) => {
-  // Rename variable to avoid conflict with props
   const [localTeachers, setLocalTeachers] = useState<Teacher[]>([
     { 
       id: '1', 
@@ -71,7 +69,7 @@ const TeacherManagement: React.FC<TeacherManagementProps> = ({ subjects, teacher
     if (!newTeacher.name || !newTeacher.email) return;
     
     const teacher: Teacher = {
-      id: (localTeachers.length + 1).toString(), // Updated to use localTeachers
+      id: (localTeachers.length + 1).toString(),
       name: newTeacher.name,
       email: newTeacher.email,
       subjects: newTeacher.subjects || [],
@@ -104,7 +102,7 @@ const TeacherManagement: React.FC<TeacherManagementProps> = ({ subjects, teacher
   };
 
   const handleNext = () => {
-    onNext({ teachers: localTeachers });
+    onNext();
   };
 
   return (

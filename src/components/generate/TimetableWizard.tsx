@@ -193,9 +193,8 @@ const TimetableWizard: React.FC = () => {
             teachers={teachers}
             onTeachersChange={setTeachers}
             subjects={subjects}
-            onSubjectsChange={setSubjects}
-            onBack={handleBack} 
             onNext={handleNext} 
+            onBack={handleBack} 
           />
         )}
         
@@ -224,7 +223,6 @@ const TimetableWizard: React.FC = () => {
         
         {currentStep === 5 && (
           <ReviewGenerate 
-            timetable={timetable}
             teachers={teachers}
             classes={classes}
             subjects={subjects}
